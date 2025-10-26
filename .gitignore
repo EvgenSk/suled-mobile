@@ -1,0 +1,117 @@
+# .gitignore for suled-mobile
+
+## Android
+*.iml
+.gradle
+local.properties
+.idea/
+.DS_Store
+build/
+captures/
+.externalNativeBuild
+.cxx
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+bin/
+gen/
+out/
+.navigation/
+captures/
+*.jks
+*.keystore
+google-services.json
+
+## Gradle
+.gradle/
+build/
+gradle-app.setting
+!gradle-wrapper.jar
+.gradletasknamecache
+
+## iOS / Xcode
+DerivedData/
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+Pods/
+Podfile.lock
+.build/
+xcuserdata/
+*.moved-aside
+*.perspectivev3
+
+## Kotlin Multiplatform
+.kotlin/
+*.klib
+
+## CocoaPods
+ios/Pods/
+ios/Podfile.lock
+
+## fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+## Android Studio
+.idea/
+*.iml
+.externalNativeBuild
+.cxx
+
+## Environment
+.env
+.env.local
+local.properties
+
+## Signing
+*.jks
+*.keystore
+keystore.properties
+
+## macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+## Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+## Backup files
+*~
+*.swp
+*.bak
+*.tmp
+*.orig
+
+## Generated files
+*.generated.swift
+*.generated.kt
+R.java
+
+## Package files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+## Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
