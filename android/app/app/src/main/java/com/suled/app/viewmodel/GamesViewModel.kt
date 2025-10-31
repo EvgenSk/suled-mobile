@@ -16,8 +16,9 @@ data class GamesUiState(
     val selectedPairName: String = ""
 )
 
-class GamesViewModel : ViewModel() {
-    private val repository = TournamentRepository()
+class GamesViewModel(
+    private val repository: TournamentRepository = TournamentRepository()
+) : ViewModel() {
     
     private val _uiState = MutableStateFlow(GamesUiState())
     val uiState: StateFlow<GamesUiState> = _uiState.asStateFlow()

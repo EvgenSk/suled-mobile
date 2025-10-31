@@ -15,8 +15,9 @@ data class PairSelectionUiState(
     val error: String? = null
 )
 
-class PairSelectionViewModel : ViewModel() {
-    private val repository = TournamentRepository()
+class PairSelectionViewModel(
+    private val repository: TournamentRepository = TournamentRepository()
+) : ViewModel() {
     
     private val _uiState = MutableStateFlow(PairSelectionUiState())
     val uiState: StateFlow<PairSelectionUiState> = _uiState.asStateFlow()

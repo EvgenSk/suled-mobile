@@ -43,21 +43,36 @@ Android application for viewing tournament games and schedules built with Kotlin
 
 ### 1. Configure Backend URL
 
-Update the API endpoint in [`ApiConstants.kt`](app/src/main/java/com/suled/app/data/api/ApiConstants.kt):
+The app automatically uses the correct backend URL based on build type:
 
-**For Android Emulator (local backend):**
+**Debug builds** (local development):
+- Android Emulator: `http://10.0.2.2:7071/api/`
+- Physical Device: Update `build.gradle.kts` with your computer's IP
+
+**Release builds** (production):
+- Azure Functions: `https://suled-app-func.azurewebsites.net/api/`
+
+To manually override, edit [`ApiConstants.kt`](app/src/main/java/com/suled/app/data/api/ApiConstants.kt) and [`build.gradle.kts`](app/build.gradle.kts):
+
 ```kotlin
-const val BASE_URL = "http://10.0.2.2:7071/api/"
+// In build.gradle.kts
+buildTypes {
+    debug {
+        buildConfigField("String", "API_BASE_URL", "\"http://YOUR_IP:7071/api/\"")
+    }
+    release {
+        buildConfigField("String", "API_BASE_URL", "\"https://suled-app-func.azurewebsites.net/api/\"")
+    }
+}
 ```
 
-**For Physical Device (local backend):**
-```kotlin
-const val BASE_URL = "http://YOUR_COMPUTER_IP:7071/api/"
-```
+**Find your computer's IP:**
+```powershell
+# Windows PowerShell
+ipconfig
 
-**For Azure Deployment:**
-```kotlin
-const val BASE_URL = "https://your-function-app.azurewebsites.net/api/"
+# macOS/Linux
+ifconfig
 ```
 
 ### 2. Open Project

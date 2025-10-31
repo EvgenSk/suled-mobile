@@ -171,30 +171,41 @@ shared/
 
 ## API Integration
 
-The mobile apps communicate with the backend API documented in [suled-backend](../suled-backend).
+The mobile apps communicate with the backend API deployed on Azure Functions.
 
-### API Endpoints Used
+### Backend Endpoints
 
+**Production**: `https://suled-app-func.azurewebsites.net/api/`
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/pairs` | GET | Get all tournament pairs |
+| `/api/games/pair/{pairId}` | GET | Get games for specific pair |
+
+### Local Development
+
+When running the backend locally (Azure Functions Core Tools):
+
+**Android Emulator**: Use `http://10.0.2.2:7071/api/`  
+**iOS Simulator**: Use `http://localhost:7071/api/`  
+**Physical Device**: Use `http://YOUR_COMPUTER_IP:7071/api/`
+
+To find your computer's IP:
+```bash
+# Windows PowerShell
+ipconfig
+
+# macOS/Linux
+ifconfig
 ```
-GET /api/pairs                    # List all tournament pairs
-GET /api/pairs/{pairId}/games     # Get games for a pair
-```
 
-### Example API Call (Android)
+### Switching Environments
 
-```kotlin
-class TournamentRepository {
-    private val api = TournamentApiService()
-    
-    suspend fun getPairs(): List<Pair> {
-        return api.getPairs()
-    }
-    
-    suspend fun getGamesForPair(pairId: String): List<Game> {
-        return api.getGamesForPair(pairId)
-    }
-}
-```
+The Android app automatically uses the correct endpoint based on build type:
+- **Debug builds**: Local backend (`http://10.0.2.2:7071/api/`)
+- **Release builds**: Azure production (`https://suled-app-func.azurewebsites.net/api/`)
+
+To manually override, edit `ApiConstants.kt` or `build.gradle.kts`.
 
 ## Development
 
