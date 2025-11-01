@@ -44,6 +44,9 @@ class PairSelectionViewModelTest {
 
         // When
         viewModel = PairSelectionViewModel(repository)
+        
+        // Process only immediate state updates
+        testScheduler.runCurrent()
 
         // Then
         assertTrue(viewModel.uiState.value.isLoading)
@@ -178,6 +181,9 @@ class PairSelectionViewModelTest {
 
         // When
         viewModel = PairSelectionViewModel(repository)
+        
+        // Process immediate state updates
+        testScheduler.runCurrent()
 
         // Then - Initially loading
         assertTrue(viewModel.uiState.value.isLoading)

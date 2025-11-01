@@ -1,14 +1,18 @@
 # Running Tests - Quick Start Guide
 
+## ⚠️ Recommended: Use Android Studio
+
+Due to JDK/Gradle compatibility issues with command-line execution, **running tests through Android Studio is strongly recommended**. Android Studio handles all Java/Gradle configuration automatically.
+
 ## Prerequisites
 
 Before running tests, ensure you have:
 
-1. **JDK 17** installed (required for Android development)
-2. **Android Studio** installed (recommended) OR
-3. **Java/JDK** in your system PATH
+1. **Android Studio** installed (required)
+2. **JDK 17** (bundled with Android Studio)
+3. Project opened in Android Studio at least once
 
-## Option 1: Run Tests in Android Studio (Recommended)
+## ✅ Option 1: Run Tests in Android Studio (RECOMMENDED)
 
 ### Run All Unit Tests
 1. Open Android Studio
@@ -60,7 +64,7 @@ $env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
 Once Java is configured:
 
 ```powershell
-# Navigate to project
+# IMPORTANT: Navigate to the Android app directory (contains gradlew.bat)
 cd D:\Projects\Software\Suled\suled-mobile\android\app
 
 # Run all unit tests
@@ -69,19 +73,18 @@ cd D:\Projects\Software\Suled\suled-mobile\android\app
 # Run with detailed output
 .\gradlew.bat test --info
 
-# Run specific test class
-.\gradlew.bat test --tests "com.suled.app.viewmodel.PairSelectionViewModelTest"
+# Run debug variant tests specifically
+.\gradlew.bat testDebugUnitTest
 
-# Run specific test method
-.\gradlew.bat test --tests "PairSelectionViewModelTest.loadPairs updates state with pairs on success"
-
-# Run with build first
-.\gradlew.bat clean test
+# Run with build first (recommended if code changed)
+.\gradlew.bat clean testDebugUnitTest
 
 # Generate test report
 .\gradlew.bat test
-# Then open: app/build/reports/tests/test/index.html
+# Then open: app\build\reports\tests\testDebugUnitTest\index.html
 ```
+
+**Note:** The `--tests` filter option may not work with all Gradle versions. If you get "Unknown command-line option '--tests'", just run `.\gradlew.bat test` to run all tests.
 
 ### Run Instrumented Tests (Requires Emulator/Device)
 

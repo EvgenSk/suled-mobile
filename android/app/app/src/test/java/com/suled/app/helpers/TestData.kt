@@ -4,6 +4,8 @@ import com.suled.app.data.models.Game
 import com.suled.app.data.models.GamesResponse
 import com.suled.app.data.models.Pair
 import com.suled.app.data.models.PairsResponse
+import com.suled.app.data.models.Tournament
+import com.suled.app.data.models.TournamentsResponse
 
 /**
  * Test data factory for creating mock objects in tests
@@ -84,6 +86,51 @@ object TestData {
         totalGames = totalGames
     )
     
+    fun createTournament(
+        id: String = "tournament-1",
+        name: String = "Summer Championship 2025",
+        startDate: String = "2025-06-15",
+        endDate: String? = "2025-06-17",
+        location: String? = "Central Arena",
+        division: String? = "Division A",
+        description: String? = "Annual summer tournament",
+        status: String = "Scheduled",
+        gameCount: Int = 24,
+        createdDate: String = "2025-05-01T10:00:00Z"
+    ) = Tournament(
+        id = id,
+        name = name,
+        startDate = startDate,
+        endDate = endDate,
+        location = location,
+        division = division,
+        description = description,
+        status = status,
+        gameCount = gameCount,
+        createdDate = createdDate
+    )
+    
+    fun createTournaments(count: Int = 3): List<Tournament> {
+        return (1..count).map { index ->
+            createTournament(
+                id = "tournament-$index",
+                name = "Tournament $index",
+                startDate = "2025-0${5 + index}-15",
+                location = "Arena $index",
+                division = "Division ${('A'.code + index - 1).toChar()}",
+                gameCount = 20 + index * 4
+            )
+        }
+    }
+    
+    fun createTournamentsResponse(
+        tournaments: List<Tournament> = createTournaments(),
+        totalCount: Int = tournaments.size
+    ) = TournamentsResponse(
+        tournaments = tournaments,
+        totalCount = totalCount
+    )
+    
     // JSON response strings for MockWebServer
     object Json {
         fun pairsResponse(pairs: List<Pair> = createPairs()) = """
@@ -127,6 +174,30 @@ object TestData {
         }}
                 ],
                 "totalGames": ${games.size}
+            }
+        """.trimIndent()
+        
+        fun tournamentsResponse(tournaments: List<Tournament> = createTournaments()) = """
+            {
+                "tournaments": [
+                    ${tournaments.joinToString(",\n") { tournament ->
+            """
+                    {
+                        "id": "${tournament.id}",
+                        "name": "${tournament.name}",
+                        "startDate": "${tournament.startDate}",
+                        "endDate": ${tournament.endDate?.let { "\"$it\"" } ?: "null"},
+                        "location": ${tournament.location?.let { "\"$it\"" } ?: "null"},
+                        "division": ${tournament.division?.let { "\"$it\"" } ?: "null"},
+                        "description": ${tournament.description?.let { "\"$it\"" } ?: "null"},
+                        "status": "${tournament.status}",
+                        "gameCount": ${tournament.gameCount},
+                        "createdDate": "${tournament.createdDate}"
+                    }
+                    """.trimIndent()
+        }}
+                ],
+                "totalCount": ${tournaments.size}
             }
         """.trimIndent()
         

@@ -2,6 +2,7 @@ package com.suled.app.helpers
 
 import com.suled.app.data.models.Game
 import com.suled.app.data.models.Pair
+import com.suled.app.data.models.Tournament
 
 /**
  * Test data factory for Android instrumented tests
@@ -60,6 +61,43 @@ object TestData {
                 pair1 = "Team ${('A'.code + index - 1).toChar()}",
                 pair2 = "Team ${('A'.code + index).toChar()}",
                 isOurGame = index <= ourGames
+            )
+        }
+    }
+    
+    fun createTournament(
+        id: String = "tournament-1",
+        name: String = "Summer Championship 2025",
+        startDate: String = "2025-06-15",
+        endDate: String? = "2025-06-17",
+        location: String? = "Central Arena",
+        division: String? = "Division A",
+        description: String? = "Annual summer tournament",
+        status: String = "Scheduled",
+        gameCount: Int = 24,
+        createdDate: String = "2025-05-01T10:00:00Z"
+    ) = Tournament(
+        id = id,
+        name = name,
+        startDate = startDate,
+        endDate = endDate,
+        location = location,
+        division = division,
+        description = description,
+        status = status,
+        gameCount = gameCount,
+        createdDate = createdDate
+    )
+    
+    fun createTournaments(count: Int = 3): List<Tournament> {
+        return (1..count).map { index ->
+            createTournament(
+                id = "tournament-$index",
+                name = "Tournament $index",
+                startDate = "2025-0${5 + index}-15",
+                location = "Arena $index",
+                division = "Division ${('A'.code + index - 1).toChar()}",
+                gameCount = 20 + index * 4
             )
         }
     }

@@ -16,6 +16,30 @@ class TournamentRepository(
     private val apiService: TournamentApiService = createDefaultApiService()
 ) {
 
+    suspend fun getTournaments(
+        startDateFrom: String? = null,
+        startDateTo: String? = null,
+        location: String? = null,
+        division: String? = null,
+        status: String? = "Scheduled",
+        maxResults: Int? = 100
+    ): Result<List<com.suled.app.data.models.Tournament>> = withContext(Dispatchers.IO) {
+        try {
+            val response = apiService.getTournaments(
+                startDateFrom, startDateTo, location, division, status, maxResults
+            )
+            if (response.isSuccessful) {
+                response.body()?.let {
+                    Result.success(it.tournaments)
+                } ?: Result.failure(Exception("Empty response"))
+            } else {
+                Result.failure(Exception("Error: ${response.code()} - ${response.message()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun getPairs(): Result<List<Pair>> = withContext(Dispatchers.IO) {
         try {
             val response = apiService.getPairs()

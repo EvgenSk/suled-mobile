@@ -8,8 +8,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.suled.app.ui.screens.GamesListScreen
 import com.suled.app.ui.screens.PairSelectionScreen
+import com.suled.app.ui.screens.TournamentListScreen
 
 object Routes {
+    const val TOURNAMENT_LIST = "tournament_list"
     const val PAIR_SELECTION = "pair_selection"
     const val GAMES_LIST = "games_list/{pairId}/{pairName}"
     
@@ -22,8 +24,18 @@ fun TournamentNavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Routes.PAIR_SELECTION
+        startDestination = Routes.TOURNAMENT_LIST
     ) {
+        composable(Routes.TOURNAMENT_LIST) {
+            TournamentListScreen(
+                onTournamentSelected = { tournamentId ->
+                    // For now, navigate to pair selection
+                    // Later we can add tournament details screen
+                    navController.navigate(Routes.PAIR_SELECTION)
+                }
+            )
+        }
+        
         composable(Routes.PAIR_SELECTION) {
             PairSelectionScreen(
                 onPairSelected = { pairId, pairName ->

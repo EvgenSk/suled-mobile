@@ -80,6 +80,9 @@ class GamesViewModelTest {
 
         // When
         viewModel.loadGames(pairId, pairName)
+        
+        // Process immediate state updates
+        testScheduler.runCurrent()
 
         // Then - Initially loading
         assertTrue(viewModel.uiState.value.isLoading)

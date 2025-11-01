@@ -371,4 +371,151 @@ class TournamentRepositoryTest {
         assertEquals(2, pairsResult.getOrNull()?.size)
         assertEquals(3, gamesResult.getOrNull()?.size)
     }
+
+    // ========== getTournaments() Tests ==========
+
+    @Test
+    fun `getTournaments returns parsed tournaments from API on success`() = runTest {
+        // Given
+        val mockTournaments = TestData.createTournaments(3)
+        mockWebServer.enqueue(
+            MockResponse()
+                .setResponseCode(HttpURLConnection.HTTP_OK)
+                .setBody(TestData.Json.tournamentsResponse(mockTournaments))
+        )
+
+        // When
+        val result = repository.getTournaments()
+
+        // Then
+        assertTrue(result.isSuccess)
+        val tournaments = result.getOrNull()
+        assertNotNull(tournaments)
+        assertEquals(3, tournaments!!.size)
+        assertEquals(mockTournaments[0].id, tournaments[0].id)
+        assertEquals(mockTournaments[0].name, tournaments[0].name)
+    }
+
+    @Test
+    fun `getTournaments returns empty list when API returns empty tournaments`() = runTest {
+        // Given
+        mockWebServer.enqueue(
+            MockResponse()
+                .setResponseCode(HttpURLConnection.HTTP_OK)
+                .setBody(TestData.Json.tournamentsResponse(emptyList()))
+        )
+
+        // When
+        val result = repository.getTournaments()
+
+        // Then
+        assertTrue(result.isSuccess)
+        val tournaments = result.getOrNull()
+        assertNotNull(tournaments)
+        assertTrue(tournaments!!.isEmpty())
+    }
+
+    @Test
+    fun `getTournaments returns failure on 404 error`() = runTest {
+        // Given
+        mockWebServer.enqueue(
+            MockResponse()
+                .setResponseCode(HttpURLConnection.HTTP_NOT_FOUND)
+                .setBody(TestData.Json.errorResponse)
+        )
+
+        // When
+        val result = repository.getTournaments()
+
+        // Then
+        assertTrue(result.isFailure)
+        val exception = result.exceptionOrNull()
+        assertNotNull(exception)
+        assertTrue(exception?.message?.contains("404") == true)
+    }
+
+    @Test
+    fun `getTournaments returns failure on 500 error`() = runTest {
+        // Given
+        mockWebServer.enqueue(
+            MockResponse()
+                .setResponseCode(HttpURLConnection.HTTP_INTERNAL_ERROR)
+                .setBody(TestData.Json.errorResponse)
+        )
+
+        // When
+        val result = repository.getTournaments()
+
+        // Then
+        assertTrue(result.isFailure)
+        val exception = result.exceptionOrNull()
+        assertNotNull(exception)
+        assertTrue(exception?.message?.contains("500") == true)
+    }
+
+    @Test
+    fun `getTournaments makes correct API request with query parameters`() = runTest {
+        // Given
+        mockWebServer.enqueue(
+            MockResponse()
+                .setResponseCode(HttpURLConnection.HTTP_OK)
+                .setBody(TestData.Json.tournamentsResponse())
+        )
+
+        // When
+        repository.getTournaments(
+            startDateFrom = "2025-06-01",
+            startDateTo = "2025-12-31",
+            location = "Central Arena",
+            division = "Division A",
+            status = "Scheduled",
+            maxResults = 50
+        )
+
+        // Then
+        val request = mockWebServer.takeRequest()
+        assertEquals("GET", request.method)
+        assertTrue(request.path?.contains("tournaments") == true)
+        assertTrue(request.path?.contains("startDateFrom=2025-06-01") == true)
+        assertTrue(request.path?.contains("startDateTo=2025-12-31") == true)
+        assertTrue(request.path?.contains("location=Central+Arena") == true)
+        assertTrue(request.path?.contains("division=Division+A") == true)
+        assertTrue(request.path?.contains("status=Scheduled") == true)
+        assertTrue(request.path?.contains("maxResults=50") == true)
+    }
+
+    @Test
+    fun `getTournaments with default parameters makes minimal request`() = runTest {
+        // Given
+        mockWebServer.enqueue(
+            MockResponse()
+                .setResponseCode(HttpURLConnection.HTTP_OK)
+                .setBody(TestData.Json.tournamentsResponse())
+        )
+
+        // When
+        repository.getTournaments()
+
+        // Then
+        val request = mockWebServer.takeRequest()
+        assertEquals("GET", request.method)
+        assertTrue(request.path?.contains("tournaments") == true)
+        // Default parameters should still be included
+        assertTrue(request.path?.contains("status=Scheduled") == true)
+        assertTrue(request.path?.contains("maxResults=100") == true)
+    }
+
+    @Test
+    fun `getTournaments returns failure on network error`() = runTest {
+        // Given - Shutdown server to simulate network error
+        mockWebServer.shutdown()
+
+        // When
+        val result = repository.getTournaments()
+
+        // Then
+        assertTrue(result.isFailure)
+        assertNotNull(result.exceptionOrNull())
+    }
 }
+
