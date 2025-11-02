@@ -91,12 +91,36 @@ ifconfig
 
 ### 3. Build the App
 
-```bash
+#### For Development (Debug)
+```powershell
 # Clean build
-.\gradlew clean
+.\gradlew.bat clean
 
 # Build debug APK
-.\gradlew assembleDebug
+.\gradlew.bat assembleDebug
+
+# Install on connected device
+.\gradlew.bat installDebug
+
+# Or use the build menu script
+.\build-menu.ps1
+```
+
+#### For Release (Production)
+See **[RELEASE_SETUP.md](RELEASE_SETUP.md)** for complete instructions on:
+- Generating release keystore
+- Configuring signing
+- Building signed APK/AAB
+- Publishing to Google Play Store
+
+Quick commands (after keystore setup):
+```powershell
+# Build signed release APK
+.\gradlew.bat assembleRelease
+
+# Build signed AAB for Play Store
+.\gradlew.bat bundleRelease
+```
 
 # Build release APK (requires signing configuration)
 .\gradlew assembleRelease
