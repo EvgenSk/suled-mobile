@@ -16,12 +16,14 @@ object TestData {
         id: String = "pair-1",
         displayName: String = "Team A",
         player1: String = "John Doe",
-        player2: String = "Jane Smith"
+        player2: String = "Jane Smith",
+        gameCount: Int = 5
     ) = Pair(
         id = id,
         displayName = displayName,
         player1 = player1,
-        player2 = player2
+        player2 = player2,
+        gameCount = gameCount
     )
     
     fun createPairs(count: Int = 3): List<Pair> {
@@ -30,7 +32,8 @@ object TestData {
                 id = "pair-$index",
                 displayName = "Team ${('A'.code + index - 1).toChar()}",
                 player1 = "Player ${index * 2 - 1}",
-                player2 = "Player ${index * 2}"
+                player2 = "Player ${index * 2}",
+                gameCount = 5 + index
             )
         }
     }
@@ -89,11 +92,11 @@ object TestData {
     fun createTournament(
         id: String = "tournament-1",
         name: String = "Summer Championship 2025",
-        startDate: String = "2025-06-15",
+        startDate: String? = "2025-06-15",
         endDate: String? = "2025-06-17",
-        location: String? = "Central Arena",
-        division: String? = "Division A",
-        description: String? = "Annual summer tournament",
+        location: String = "Central Arena",
+        division: String = "Division A",
+        description: String = "Annual summer tournament",
         status: String = "Scheduled",
         gameCount: Int = 24,
         createdDate: String = "2025-05-01T10:00:00Z"
@@ -142,7 +145,8 @@ object TestData {
                         "id": "${pair.id}",
                         "displayName": "${pair.displayName}",
                         "player1": "${pair.player1}",
-                        "player2": "${pair.player2}"
+                        "player2": "${pair.player2}",
+                        "gameCount": ${pair.gameCount}
                     }
                     """.trimIndent()
         }}
@@ -185,11 +189,11 @@ object TestData {
                     {
                         "id": "${tournament.id}",
                         "name": "${tournament.name}",
-                        "startDate": "${tournament.startDate}",
+                        "startDate": ${tournament.startDate?.let { "\"$it\"" } ?: "null"},
                         "endDate": ${tournament.endDate?.let { "\"$it\"" } ?: "null"},
-                        "location": ${tournament.location?.let { "\"$it\"" } ?: "null"},
-                        "division": ${tournament.division?.let { "\"$it\"" } ?: "null"},
-                        "description": ${tournament.description?.let { "\"$it\"" } ?: "null"},
+                        "location": "${tournament.location}",
+                        "division": "${tournament.division}",
+                        "description": "${tournament.description}",
                         "status": "${tournament.status}",
                         "gameCount": ${tournament.gameCount},
                         "createdDate": "${tournament.createdDate}"

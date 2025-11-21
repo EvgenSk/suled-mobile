@@ -13,7 +13,10 @@ data class Pair(
     val player1: String,
     
     @SerializedName("player2")
-    val player2: String
+    val player2: String,
+    
+    @SerializedName("gameCount")
+    val gameCount: Int = 0
 )
 
 data class PairsResponse(

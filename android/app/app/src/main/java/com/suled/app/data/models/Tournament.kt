@@ -10,19 +10,19 @@ data class Tournament(
     val name: String,
     
     @SerializedName("startDate")
-    val startDate: String,
+    val startDate: String?,
     
     @SerializedName("endDate")
     val endDate: String?,
     
     @SerializedName("location")
-    val location: String?,
+    val location: String = "",
     
     @SerializedName("division")
-    val division: String?,
+    val division: String = "",
     
     @SerializedName("description")
-    val description: String?,
+    val description: String = "",
     
     @SerializedName("status")
     val status: String,
