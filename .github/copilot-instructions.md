@@ -1,5 +1,11 @@
 # GitHub Copilot Instructions for Suled Mobile
 
+## 🚨 CRITICAL WORKFLOW RULE
+**ALWAYS run tests IMMEDIATELY after making code changes, especially refactoring.**
+- Command: `.\gradlew.bat test` (from android/app directory)
+- Do NOT report work as complete until tests pass
+- This is a mandatory step, not optional
+
 ## Testing Guidelines
 
 ### When Business Logic Changes
@@ -10,16 +16,18 @@
 - Maintain both unit tests (JVM) and instrumented tests (Android device)
 
 ### After Refactoring
-- **Always run tests** after completing any refactoring work
-- Run unit tests: `.\gradlew.bat test`
-- Run instrumented tests: `.\gradlew.bat connectedAndroidTest`
-- Run specific test class: `.\gradlew.bat test --tests "com.suled.app.viewmodel.GamesViewModelTest"`
+- **CRITICAL: IMMEDIATELY run tests after ANY refactoring** - this is non-negotiable
+- **REQUIRED STEP**: Run unit tests: `.\gradlew.bat test` (from android/app directory)
+- **REQUIRED STEP**: Run instrumented tests (if UI changed): `.\gradlew.bat connectedAndroidTest`
+- **DO NOT** present work as complete until ALL tests pass
+- Run specific test class if needed: `.\gradlew.bat test --tests "com.suled.app.viewmodel.GamesViewModelTest"`
 - Fix any failing tests before considering the refactoring complete
 - Ensure all 39+ unit tests and 9+ UI tests pass before committing
+- **WORKFLOW**: Code change → Run tests → Fix failures → Verify passing → THEN report complete
 
 ### Test Maintenance
 - Keep test mocks synchronized with backend API responses
-- When models change (e.g., Game, Pair, Tournament), update all affected test files in both `test/` and `androidTest/`
+- When models change (e.g., Game, Pair, Tournament, TournamentRound), update all affected test files in both `test/` and `androidTest/`
 - When adding new screens or ViewModels, create corresponding test coverage
 - Verify ViewModels, repositories, UI screens, and edge cases
 - Follow testing pyramid: 70% unit tests, 20% integration tests, 10% UI tests
