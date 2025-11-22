@@ -7,6 +7,7 @@ object ApiConstants {
     const val BASE_URL = BuildConfig.API_BASE_URL
     
     const val TOURNAMENTS_ENDPOINT = "tournaments"
+    const val TOURNAMENT_DETAIL_ENDPOINT = "tournament/{id}"
     const val PAIRS_ENDPOINT = "pairs"
     const val GAMES_FOR_PAIR_ENDPOINT = "games/pair/{pairId}"
 }

@@ -2,6 +2,7 @@ package com.suled.app.data.api
 
 import com.suled.app.data.models.GamesResponse
 import com.suled.app.data.models.PairsResponse
+import com.suled.app.data.models.TournamentDetail
 import com.suled.app.data.models.TournamentsResponse
 import retrofit2.Response
 import retrofit2.http.GET
@@ -18,6 +19,11 @@ interface TournamentApiService {
         @Query("status") status: String? = null,
         @Query("maxResults") maxResults: Int? = 100
     ): Response<TournamentsResponse>
+    
+    @GET(ApiConstants.TOURNAMENT_DETAIL_ENDPOINT)
+    suspend fun getTournamentById(
+        @Path("id") tournamentId: String
+    ): Response<TournamentDetail>
     
     @GET(ApiConstants.PAIRS_ENDPOINT)
     suspend fun getPairs(): Response<PairsResponse>
