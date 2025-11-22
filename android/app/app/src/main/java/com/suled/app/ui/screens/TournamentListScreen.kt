@@ -153,7 +153,7 @@ fun TournamentCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = formatDate(tournament.startDate),
+                    text = tournament.startDate?.let { formatDate(it) } ?: "Date TBD",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
