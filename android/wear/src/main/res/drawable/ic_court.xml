@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    
+    <!-- Badminton court icon -->
+    <!-- Court outline -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M3,4 L21,4 L21,20 L3,20 Z M4,5 L4,19 L20,19 L20,5 Z" />
+    
+    <!-- Net in the middle -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:strokeWidth="1.5"
+        android:pathData="M12,5 L12,19"
+        android:strokeColor="#FFFFFF" />
+    
+    <!-- Service lines -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M6,8 L18,8 M6,16 L18,16" />
+    
+    <!-- Center service line (short) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M12,8 L12,5 M12,16 L12,19" />
+    
+</vector>

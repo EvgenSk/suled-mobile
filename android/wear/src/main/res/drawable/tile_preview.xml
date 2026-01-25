@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="400dp"
+    android:height="400dp"
+    android:viewportWidth="400"
+    android:viewportHeight="400">
+    
+    <!-- Background -->
+    <path
+        android:fillColor="#1E1E1E"
+        android:pathData="M0,0 L400,0 L400,400 L0,400 Z" />
+    
+    <!-- Badminton court icon in center -->
+    <path
+        android:fillColor="#4CAF50"
+        android:pathData="M150,140 L250,140 L250,260 L150,260 Z M155,145 L155,255 L245,255 L245,145 Z" />
+    
+    <!-- Net in middle -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:strokeWidth="3"
+        android:pathData="M200,145 L200,255"
+        android:strokeColor="#FFFFFF" />
+    
+    <!-- Service lines -->
+    <path
+        android:fillColor="#4CAF50"
+        android:pathData="M165,170 L235,170 M165,230 L235,230" />
+    
+    <!-- Text: "Court 3" -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M170,290 Q170,280 180,280 Q190,280 190,290 Q190,300 180,300 Q170,300 170,290 Z" />
+    
+    <!-- Text: "12m" below -->
+    <path
+        android:fillColor="#4CAF50"
+        android:pathData="M185,320 L185,340 M195,320 L195,340 M205,320 Q215,320 215,330 Q215,340 205,340" />
+    
+</vector>

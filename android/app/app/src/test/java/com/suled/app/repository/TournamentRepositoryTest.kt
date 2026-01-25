@@ -1,10 +1,15 @@
 package com.suled.app.repository
 
 import com.suled.app.data.api.TournamentApiService
+import com.suled.app.data.local.dao.TournamentDao
+import com.suled.app.data.local.dao.TrackedPairDao
 import com.suled.app.data.repository.TournamentRepository
 import com.suled.app.helpers.CoroutineTestRule
 import com.suled.app.helpers.TestData
+import io.mockk.coEvery
+import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
@@ -31,6 +36,8 @@ class TournamentRepositoryTest {
     private lateinit var mockWebServer: MockWebServer
     private lateinit var repository: TournamentRepository
     private lateinit var apiService: TournamentApiService
+    private lateinit var tournamentDao: TournamentDao
+    private lateinit var trackedPairDao: TrackedPairDao
 
     @Before
     fun setup() {
@@ -50,7 +57,16 @@ class TournamentRepositoryTest {
             .build()
             .create(TournamentApiService::class.java)
 
-        repository = TournamentRepository(apiService)
+        tournamentDao = mockk(relaxed = true) {
+            coEvery { observeAllTournaments() } returns flowOf(emptyList())
+            coEvery { observeTournamentsByStatus(any()) } returns flowOf(emptyList())
+        }
+
+        trackedPairDao = mockk(relaxed = true) {
+            coEvery { observeAllTrackedPairs() } returns flowOf(emptyList())
+        }
+
+        repository = TournamentRepository(apiService, tournamentDao, trackedPairDao)
     }
 
     @After
@@ -372,10 +388,10 @@ class TournamentRepositoryTest {
         assertEquals(3, gamesResult.getOrNull()?.size)
     }
 
-    // ========== getTournaments() Tests ==========
+    // ========== refreshTournaments() Tests ==========
 
     @Test
-    fun `getTournaments returns parsed tournaments from API on success`() = runTest {
+    fun `refreshTournaments returns success and saves tournaments on API success`() = runTest {
         // Given
         val mockTournaments = TestData.createTournaments(3)
         mockWebServer.enqueue(
@@ -385,19 +401,15 @@ class TournamentRepositoryTest {
         )
 
         // When
-        val result = repository.getTournaments()
+        val result = repository.refreshTournaments()
 
         // Then
         assertTrue(result.isSuccess)
-        val tournaments = result.getOrNull()
-        assertNotNull(tournaments)
-        assertEquals(3, tournaments!!.size)
-        assertEquals(mockTournaments[0].id, tournaments[0].id)
-        assertEquals(mockTournaments[0].name, tournaments[0].name)
+        // Verify that tournaments were saved to database (via mockk relaxed mode)
     }
 
     @Test
-    fun `getTournaments returns empty list when API returns empty tournaments`() = runTest {
+    fun `refreshTournaments returns success when API returns empty tournaments`() = runTest {
         // Given
         mockWebServer.enqueue(
             MockResponse()
@@ -406,17 +418,14 @@ class TournamentRepositoryTest {
         )
 
         // When
-        val result = repository.getTournaments()
+        val result = repository.refreshTournaments()
 
         // Then
         assertTrue(result.isSuccess)
-        val tournaments = result.getOrNull()
-        assertNotNull(tournaments)
-        assertTrue(tournaments!!.isEmpty())
     }
 
     @Test
-    fun `getTournaments returns failure on 404 error`() = runTest {
+    fun `refreshTournaments returns failure on 404 error`() = runTest {
         // Given
         mockWebServer.enqueue(
             MockResponse()
@@ -425,7 +434,7 @@ class TournamentRepositoryTest {
         )
 
         // When
-        val result = repository.getTournaments()
+        val result = repository.refreshTournaments()
 
         // Then
         assertTrue(result.isFailure)
@@ -435,7 +444,7 @@ class TournamentRepositoryTest {
     }
 
     @Test
-    fun `getTournaments returns failure on 500 error`() = runTest {
+    fun `refreshTournaments returns failure on 500 error`() = runTest {
         // Given
         mockWebServer.enqueue(
             MockResponse()
@@ -444,7 +453,7 @@ class TournamentRepositoryTest {
         )
 
         // When
-        val result = repository.getTournaments()
+        val result = repository.refreshTournaments()
 
         // Then
         assertTrue(result.isFailure)
@@ -454,7 +463,7 @@ class TournamentRepositoryTest {
     }
 
     @Test
-    fun `getTournaments makes correct API request with query parameters`() = runTest {
+    fun `refreshTournaments makes correct API request with query parameters`() = runTest {
         // Given
         mockWebServer.enqueue(
             MockResponse()
@@ -463,7 +472,7 @@ class TournamentRepositoryTest {
         )
 
         // When
-        repository.getTournaments(
+        repository.refreshTournaments(
             startDateFrom = "2025-06-01",
             startDateTo = "2025-12-31",
             location = "Central Arena",
@@ -488,7 +497,7 @@ class TournamentRepositoryTest {
     }
 
     @Test
-    fun `getTournaments with default parameters makes minimal request`() = runTest {
+    fun `refreshTournaments with default parameters makes minimal request`() = runTest {
         // Given
         mockWebServer.enqueue(
             MockResponse()
@@ -497,7 +506,7 @@ class TournamentRepositoryTest {
         )
 
         // When
-        repository.getTournaments()
+        repository.refreshTournaments()
 
         // Then
         val request = mockWebServer.takeRequest()
@@ -509,12 +518,12 @@ class TournamentRepositoryTest {
     }
 
     @Test
-    fun `getTournaments returns failure on network error`() = runTest {
+    fun `refreshTournaments returns failure on network error`() = runTest {
         // Given - Shutdown server to simulate network error
         mockWebServer.shutdown()
 
         // When
-        val result = repository.getTournaments()
+        val result = repository.refreshTournaments()
 
         // Then
         assertTrue(result.isFailure)

@@ -4,12 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.suled.app.data.models.Tournament
 import com.suled.app.data.repository.TournamentRepository
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import javax.inject.Inject
 
 data class TournamentListUiState(
     val tournaments: List<Tournament> = emptyList(),
@@ -17,45 +17,76 @@ data class TournamentListUiState(
     val error: String? = null
 )
 
-class TournamentListViewModel(
-    private val repository: TournamentRepository = TournamentRepository()
+@HiltViewModel
+class TournamentListViewModel @Inject constructor(
+    private val repository: TournamentRepository
 ) : ViewModel() {
     
-    private val _uiState = MutableStateFlow(TournamentListUiState())
-    val uiState: StateFlow<TournamentListUiState> = _uiState.asStateFlow()
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+    
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error.asStateFlow()
+
+    // Observe tournaments from database (offline-first)
+    val uiState: StateFlow<TournamentListUiState> = repository
+        .observeTournamentsByStatus("Scheduled")
+        .map { tournaments ->
+            TournamentListUiState(
+                tournaments = tournaments,
+                isLoading = false,
+                error = null
+            )
+        }
+        .catch { exception ->
+            emit(TournamentListUiState(
+                tournaments = emptyList(),
+                isLoading = false,
+                error = exception.message ?: "Unknown error"
+            ))
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = TournamentListUiState(isLoading = true)
+        )
 
     init {
-        loadUpcomingTournaments()
+        // Load tournaments on initialization
+        refreshTournaments()
     }
 
-    fun loadUpcomingTournaments() {
+    /**
+     * Refresh tournaments from network
+     */
+    fun refreshTournaments() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            _isRefreshing.value = true
+            _error.value = null
             
             // Get tournaments starting from today onwards
             val today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
             
-            repository.getTournaments(
+            repository.refreshTournaments(
                 startDateFrom = today,
                 status = "Scheduled",
                 maxResults = 50
             )
-                .onSuccess { tournaments ->
-                    _uiState.value = _uiState.value.copy(
-                        tournaments = tournaments,
-                        isLoading = false
-                    )
+                .onSuccess {
+                    _isRefreshing.value = false
                 }
                 .onFailure { exception ->
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        error = exception.message ?: "Unknown error"
-                    )
+                    _isRefreshing.value = false
+                    _error.value = exception.message ?: "Unknown error"
                 }
         }
     }
 
     fun retry() {
-        loadUpcomingTournaments()
+        refreshTournaments()
+    }
+    
+    fun clearError() {
+        _error.value = null
     }
 }

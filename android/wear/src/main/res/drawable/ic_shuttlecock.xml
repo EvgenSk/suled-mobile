@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    
+    <!-- Shuttlecock icon -->
+    
+    <!-- Cork/base (rounded bottom) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M10,16 L10,18 Q10,19 12,19 Q14,19 14,18 L14,16 Z" />
+    
+    <!-- Feathers (cone shape) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M12,5 L8,16 L16,16 Z" />
+    
+    <!-- Feather details (lines to show individual feathers) -->
+    <path
+        android:strokeColor="#1E1E1E"
+        android:strokeWidth="0.5"
+        android:pathData="M12,5 L12,16 M10,9 L14,9 M9,12 L15,12 M8.5,15 L15.5,15" />
+    
+    <!-- Cork outline -->
+    <path
+        android:strokeColor="#1E1E1E"
+        android:strokeWidth="0.5"
+        android:pathData="M10,16 L10,18 Q10,19 12,19 Q14,19 14,18 L14,16" />
+    
+    <!-- Feather outline -->
+    <path
+        android:strokeColor="#1E1E1E"
+        android:strokeWidth="0.8"
+        android:pathData="M12,5 L8,16 L16,16 Z" />
+    
+</vector>

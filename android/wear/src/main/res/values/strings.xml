@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Suled Watch</string>
+    
+    <!-- Complication -->
+    <string name="complication_next_game">Next Game</string>
+    <string name="complication_next_game_description">Shows your next upcoming game court and time</string>
+    
+    <!-- Tile -->
+    <string name="tile_next_game">Next Game</string>
+    <string name="tile_next_game_description">Quick view of your next game</string>
+    
+    <!-- General -->
+    <string name="no_games">No upcoming games</string>
+    <string name="court_format">Court %d</string>
+    <string name="round_format">Round %d</string>
+    <string name="vs_format">vs %s</string>
+    <string name="time_now">Now</string>
+    <string name="time_minutes">%dm</string>
+    <string name="time_hours" formatted="false">%dh %dm</string>
+    <string name="starting_soon">Starting soon</string>
+</resources>
