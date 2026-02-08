@@ -17,6 +17,8 @@ on:
 jobs:
   build:
     runs-on: macos-latest
+    # Skip if ios directory doesn't exist
+    if: ${{ hashFiles('ios/**') != '' }}
 
     steps:
     - name: Checkout code
