@@ -492,7 +492,7 @@ class TournamentRepositoryTest {
         assertTrue(request.path?.contains("Arena") == true)
         assertTrue(request.path?.contains("division=Division") == true)
         assertTrue(request.path?.contains("A") == true)
-        assertTrue(request.path?.contains("status=Scheduled") == true)
+        assertTrue(request.path?.contains("status=Upcoming") == true)
         assertTrue(request.path?.contains("maxResults=50") == true)
     }
 
@@ -513,7 +513,7 @@ class TournamentRepositoryTest {
         assertEquals("GET", request.method)
         assertTrue(request.path?.contains("tournaments") == true)
         // Default parameters should still be included
-        assertTrue(request.path?.contains("status=Scheduled") == true)
+        assertTrue(request.path?.contains("status=Upcoming") == true)
         assertTrue(request.path?.contains("maxResults=100") == true)
     }
 
