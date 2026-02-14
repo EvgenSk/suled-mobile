@@ -10,6 +10,9 @@ import com.suled.app.data.local.entity.TrackedPairEntity
 /**
  * Room database for Suled app
  * Provides offline-first data persistence
+ * 
+ * Version History:
+ * - Version 1: Initial schema with TournamentEntity and TrackedPairEntity
  */
 @Database(
     entities = [
@@ -17,7 +20,7 @@ import com.suled.app.data.local.entity.TrackedPairEntity
         TrackedPairEntity::class
     ],
     version = 1,
-    exportSchema = false
+    exportSchema = true
 )
 abstract class SuledDatabase : RoomDatabase() {
     abstract fun tournamentDao(): TournamentDao
