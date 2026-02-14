@@ -147,6 +147,9 @@ dependencies {
     // DataStore (replacing SharedPreferences)
     implementation("androidx.datastore:datastore-preferences:1.2.0")
 
+    // Logging
+    implementation("com.jakewharton.timber:timber:5.0.1")
+
     // Testing - Unit Tests
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")

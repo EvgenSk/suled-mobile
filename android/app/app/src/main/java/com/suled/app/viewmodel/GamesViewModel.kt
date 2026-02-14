@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 data class GamesUiState(
@@ -54,13 +55,13 @@ class GamesViewModel @Inject constructor(
                                     scheduledTime = null
                                 )
                             }
-                            android.util.Log.i("GamesViewModel", "Found ${games.size} games for pair $pairId")
+                            Timber.i("Found ${games.size} games for pair $pairId")
                             _uiState.value = _uiState.value.copy(
                                 games = games,
                                 isLoading = false
                             )
                         } else {
-                            android.util.Log.e("GamesViewModel", "Pair $pairId not found in tournament")
+                            Timber.e("Pair $pairId not found in tournament")
                             _uiState.value = _uiState.value.copy(
                                 isLoading = false,
                                 error = "Pair not found in tournament"
@@ -75,7 +76,7 @@ class GamesViewModel @Inject constructor(
                 }
                 result.isFailure -> {
                     val exception = result.exceptionOrNull()
-                    android.util.Log.e("GamesViewModel", "Error loading games", exception)
+                    Timber.e(exception, "Error loading games")
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         error = exception?.message ?: "Unknown error"

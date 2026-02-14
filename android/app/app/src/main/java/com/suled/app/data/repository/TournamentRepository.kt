@@ -14,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -74,9 +75,9 @@ class TournamentRepository @Inject constructor(
                     // Extract tournaments from the ApiResponse.data field
                     val tournaments = apiResponse.data
                     if (tournaments.isEmpty()) {
-                        android.util.Log.i("TournamentRepository", "No tournaments returned from API")
+                        Timber.i("No tournaments returned from API")
                     } else {
-                        android.util.Log.i("TournamentRepository", "Received ${tournaments.size} tournaments from API")
+                        Timber.i("Received ${tournaments.size} tournaments from API")
                     }
                     // Save to local database
                     val entities = tournaments.map { it.toEntity() }
@@ -85,11 +86,11 @@ class TournamentRepository @Inject constructor(
                 } ?: Result.failure(Exception("Empty response"))
             } else {
                 val errorMsg = "Error: ${response.code()} - ${response.message()}"
-                android.util.Log.e("TournamentRepository", errorMsg)
+                Timber.e(errorMsg)
                 Result.failure(Exception(errorMsg))
             }
         } catch (e: Exception) {
-            android.util.Log.e("TournamentRepository", "Exception refreshing tournaments", e)
+            Timber.e(e, "Exception refreshing tournaments")
             Result.failure(e)
         }
     }
@@ -127,16 +128,16 @@ class TournamentRepository @Inject constructor(
                             gameCount = tournamentPair.gameCount
                         )
                     }
-                    android.util.Log.i("TournamentRepository", "Got ${pairs.size} pairs for tournament $tournamentId")
+                    Timber.i("Got ${pairs.size} pairs for tournament $tournamentId")
                     Result.success(pairs)
                 } ?: Result.failure(Exception("Empty response"))
             } else {
                 val errorMsg = "Error: ${response.code()} - ${response.message()}"
-                android.util.Log.e("TournamentRepository", errorMsg)
+                Timber.e(errorMsg)
                 Result.failure(Exception(errorMsg))
             }
         } catch (e: Exception) {
-            android.util.Log.e("TournamentRepository", "Exception getting pairs for tournament", e)
+            Timber.e(e, "Exception getting pairs for tournament")
             Result.failure(e)
         }
     }
@@ -149,16 +150,16 @@ class TournamentRepository @Inject constructor(
             val response = apiService.getTournamentById(tournamentId)
             if (response.isSuccessful) {
                 response.body()?.let { tournament ->
-                    android.util.Log.i("TournamentRepository", "Got tournament detail with ${tournament.pairs.size} pairs")
+                    Timber.i("Got tournament detail with ${tournament.pairs.size} pairs")
                     Result.success(tournament)
                 } ?: Result.failure(Exception("Empty response"))
             } else {
                 val errorMsg = "Error: ${response.code()} - ${response.message()}"
-                android.util.Log.e("TournamentRepository", errorMsg)
+                Timber.e(errorMsg)
                 Result.failure(Exception(errorMsg))
             }
         } catch (e: Exception) {
-            android.util.Log.e("TournamentRepository", "Exception getting tournament detail", e)
+            Timber.e(e, "Exception getting tournament detail")
             Result.failure(e)
         }
     }
