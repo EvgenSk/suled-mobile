@@ -1,6 +1,7 @@
 package com.suled.app
 
 import android.app.Application
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
 
@@ -18,20 +19,27 @@ class SuledApplication : Application() {
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         } else {
-            // In production, plant a tree that logs to Crashlytics or a custom logging service
-            Timber.plant(ReleaseTree())
+            // In production, plant a tree that logs to Firebase Crashlytics
+            Timber.plant(CrashlyticsTree())
         }
     }
     
     /**
-     * Custom Timber tree for release builds
-     * Logs only warnings and errors, can be extended to send to crash reporting
+     * Custom Timber tree for release builds that sends logs to Firebase Crashlytics
+     * Logs warnings and errors to Crashlytics for remote monitoring
      */
-    private class ReleaseTree : Timber.Tree() {
+    private class CrashlyticsTree : Timber.Tree() {
         override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
             if (priority == android.util.Log.ERROR || priority == android.util.Log.WARN) {
-                // TODO: Send to crash reporting service (e.g., Firebase Crashlytics)
-                // For now, we still log but could be filtered out by ProGuard
+                val crashlytics = FirebaseCrashlytics.getInstance()
+                
+                // Log message to Crashlytics
+                crashlytics.log("$tag: $message")
+                
+                // If there's an exception, record it
+                t?.let { 
+                    crashlytics.recordException(it)
+                }
             }
         }
     }

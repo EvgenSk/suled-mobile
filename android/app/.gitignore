@@ -56,5 +56,8 @@ obj/
 *.keystore
 keystore.properties
 
+# Firebase configuration
+app/google-services.json
+
 # Android Profiling
 *.hprof
