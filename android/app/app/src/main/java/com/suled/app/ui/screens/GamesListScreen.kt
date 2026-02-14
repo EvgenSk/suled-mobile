@@ -15,22 +15,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.suled.app.ui.components.GameCard
 import com.suled.app.viewmodel.GamesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GamesListScreen(
+    tournamentId: String,
     pairId: String,
     pairName: String,
     onBackClick: () -> Unit,
-    viewModel: GamesViewModel = viewModel()
+    viewModel: GamesViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(pairId) {
-        viewModel.loadGames(pairId, pairName)
+    LaunchedEffect(tournamentId, pairId) {
+        viewModel.loadGames(tournamentId, pairId, pairName)
     }
 
     Scaffold(
@@ -54,7 +55,7 @@ fun GamesListScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { viewModel.retry(pairId, pairName) }) {
+                    IconButton(onClick = { viewModel.retry(tournamentId, pairId, pairName) }) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
                             contentDescription = "Refresh"
@@ -96,7 +97,7 @@ fun GamesListScreen(
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = { viewModel.retry(pairId, pairName) }) {
+                        Button(onClick = { viewModel.retry(tournamentId, pairId, pairName) }) {
                             Text("Retry")
                         }
                     }

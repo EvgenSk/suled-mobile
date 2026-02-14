@@ -30,7 +30,7 @@ class TournamentListViewModel @Inject constructor(
 
     // Observe tournaments from database (offline-first)
     val uiState: StateFlow<TournamentListUiState> = repository
-        .observeTournamentsByStatus("Scheduled")
+        .observeTournamentsByStatus("Upcoming")
         .map { tournaments ->
             TournamentListUiState(
                 tournaments = tournaments,
@@ -69,7 +69,7 @@ class TournamentListViewModel @Inject constructor(
             
             repository.refreshTournaments(
                 startDateFrom = today,
-                status = "Scheduled",
+                status = "Upcoming",
                 maxResults = 50
             )
                 .onSuccess {

@@ -477,7 +477,7 @@ class TournamentRepositoryTest {
             startDateTo = "2025-12-31",
             location = "Central Arena",
             division = "Division A",
-            status = "Scheduled",
+            status = "Upcoming",
             maxResults = 50
         )
 

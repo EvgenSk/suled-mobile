@@ -76,7 +76,7 @@ object TestData {
         location: String = "Central Arena",
         division: String = "Division A",
         description: String = "Annual summer tournament",
-        status: String = "Scheduled",
+        status: String = "Upcoming",
         gameCount: Int = 24,
         createdDate: String = "2025-05-01T10:00:00Z"
     ) = Tournament(

@@ -50,7 +50,7 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:7071/api/\"")
+            buildConfigField("String", "API_BASE_URL", "\"https://suled-xiprdpedesda2-func.azurewebsites.net/api/\"")
         }
         release {
             // Apply signing config if keystore.properties exists
@@ -79,15 +79,18 @@ android {
         compose = true
         buildConfig = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.14"
-    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
             excludes += "/META-INF/LICENSE.md"
             excludes += "/META-INF/LICENSE-notice.md"
             excludes += "/META-INF/versions/9/OSGI-INF/MANIFEST.MF"
+        }
+    }
+    
+    testOptions {
+        unitTests {
+            isReturnDefaultValues = true
         }
     }
 }

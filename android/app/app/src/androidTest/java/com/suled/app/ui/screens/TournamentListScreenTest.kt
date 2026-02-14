@@ -138,7 +138,7 @@ class TournamentListScreenTest {
             division = "Division A",
             description = "Annual summer tournament",
             gameCount = 24,
-            status = "Scheduled"
+            status = "Upcoming"
         )
         
         composeTestRule.setContent {
@@ -156,7 +156,7 @@ class TournamentListScreenTest {
         composeTestRule.onNodeWithText("Division A").assertIsDisplayed()
         composeTestRule.onNodeWithText("Annual summer tournament").assertIsDisplayed()
         composeTestRule.onNodeWithText("24 games").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Scheduled").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Upcoming").assertIsDisplayed()
     }
 
     @Test

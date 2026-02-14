@@ -62,7 +62,7 @@ class TournamentListViewModelTest {
     fun `loadUpcomingTournaments updates state with tournaments on success`() = runTest {
         // Given
         val mockTournaments = TestData.createTournaments(3)
-        every { repository.observeTournamentsByStatus("Scheduled") } returns flowOf(mockTournaments)
+        every { repository.observeTournamentsByStatus("Upcoming") } returns flowOf(mockTournaments)
         coEvery {
             repository.refreshTournaments(any(), any(), any(), any(), any(), any())
         } returns Result.success(Unit)
@@ -91,7 +91,7 @@ class TournamentListViewModelTest {
     fun `loadUpcomingTournaments updates state with error on failure`() = runTest {
         // Given
         val errorMessage = "Network error"
-        every { repository.observeTournamentsByStatus("Scheduled") } returns flowOf(emptyList())
+        every { repository.observeTournamentsByStatus("Upcoming") } returns flowOf(emptyList())
         coEvery {
             repository.refreshTournaments(any(), any(), any(), any(), any(), any())
         } returns Result.failure(IOException(errorMessage))
@@ -108,7 +108,7 @@ class TournamentListViewModelTest {
     @Test
     fun `loadUpcomingTournaments calls repository with correct parameters`() = runTest {
         // Given
-        every { repository.observeTournamentsByStatus("Scheduled") } returns flowOf(emptyList())
+        every { repository.observeTournamentsByStatus("Upcoming") } returns flowOf(emptyList())
         coEvery {
             repository.refreshTournaments(any(), any(), any(), any(), any(), any())
         } returns Result.success(Unit)
@@ -124,7 +124,7 @@ class TournamentListViewModelTest {
                 startDateTo = null,
                 location = null,
                 division = null,
-                status = "Scheduled",
+                status = "Upcoming",
                 maxResults = 50
             )
         }
@@ -133,7 +133,7 @@ class TournamentListViewModelTest {
     @Test
     fun `retry calls loadUpcomingTournaments again`() = runTest {
         // Given
-        every { repository.observeTournamentsByStatus("Scheduled") } returns flowOf(TestData.createTournaments(2))
+        every { repository.observeTournamentsByStatus("Upcoming") } returns flowOf(TestData.createTournaments(2))
         coEvery {
             repository.refreshTournaments(any(), any(), any(), any(), any(), any())
         } returns Result.success(Unit)
@@ -154,7 +154,7 @@ class TournamentListViewModelTest {
     @Test
     fun `loadUpcomingTournaments sets loading state correctly`() = runTest {
         // Given
-        every { repository.observeTournamentsByStatus("Scheduled") } returns flowOf(TestData.createTournaments())
+        every { repository.observeTournamentsByStatus("Upcoming") } returns flowOf(TestData.createTournaments())
         coEvery {
             repository.refreshTournaments(any(), any(), any(), any(), any(), any())
         } coAnswers {
@@ -182,7 +182,7 @@ class TournamentListViewModelTest {
     @Test
     fun `empty tournaments list returns empty state`() = runTest {
         // Given
-        every { repository.observeTournamentsByStatus("Scheduled") } returns flowOf(emptyList())
+        every { repository.observeTournamentsByStatus("Upcoming") } returns flowOf(emptyList())
         coEvery {
             repository.refreshTournaments(any(), any(), any(), any(), any(), any())
         } returns Result.success(Unit)
@@ -214,7 +214,7 @@ class TournamentListViewModelTest {
             TestData.createTournament(id = "2", startDate = "2025-06-01"),
             TestData.createTournament(id = "3", startDate = "2025-07-01")
         )
-        every { repository.observeTournamentsByStatus("Scheduled") } returns flowOf(tournaments)
+        every { repository.observeTournamentsByStatus("Upcoming") } returns flowOf(tournaments)
         coEvery {
             repository.refreshTournaments(any(), any(), any(), any(), any(), any())
         } returns Result.success(Unit)

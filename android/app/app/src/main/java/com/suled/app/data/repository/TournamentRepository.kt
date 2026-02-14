@@ -9,6 +9,7 @@ import com.suled.app.data.local.entity.toEntity
 import com.suled.app.data.models.Game
 import com.suled.app.data.models.Pair
 import com.suled.app.data.models.Tournament
+import com.suled.app.data.models.TournamentDetail
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -61,7 +62,7 @@ class TournamentRepository @Inject constructor(
         startDateTo: String? = null,
         location: String? = null,
         division: String? = null,
-        status: String? = "Scheduled",
+        status: String? = "Upcoming",
         maxResults: Int? = 100
     ): Result<Unit> = withContext(Dispatchers.IO) {
         try {
@@ -69,16 +70,26 @@ class TournamentRepository @Inject constructor(
                 startDateFrom, startDateTo, location, division, status, maxResults
             )
             if (response.isSuccessful) {
-                response.body()?.let { tournamentResponse ->
+                response.body()?.let { apiResponse ->
+                    // Extract tournaments from the ApiResponse.data field
+                    val tournaments = apiResponse.data
+                    if (tournaments.isEmpty()) {
+                        android.util.Log.i("TournamentRepository", "No tournaments returned from API")
+                    } else {
+                        android.util.Log.i("TournamentRepository", "Received ${tournaments.size} tournaments from API")
+                    }
                     // Save to local database
-                    val entities = tournamentResponse.tournaments.map { it.toEntity() }
+                    val entities = tournaments.map { it.toEntity() }
                     tournamentDao.insertTournaments(entities)
                     Result.success(Unit)
                 } ?: Result.failure(Exception("Empty response"))
             } else {
-                Result.failure(Exception("Error: ${response.code()} - ${response.message()}"))
+                val errorMsg = "Error: ${response.code()} - ${response.message()}"
+                android.util.Log.e("TournamentRepository", errorMsg)
+                Result.failure(Exception(errorMsg))
             }
         } catch (e: Exception) {
+            android.util.Log.e("TournamentRepository", "Exception refreshing tournaments", e)
             Result.failure(e)
         }
     }
@@ -94,6 +105,60 @@ class TournamentRepository @Inject constructor(
                 Result.failure(Exception("Error: ${response.code()} - ${response.message()}"))
             }
         } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Get pairs for a specific tournament
+     */
+    suspend fun getPairsForTournament(tournamentId: String): Result<List<Pair>> = withContext(Dispatchers.IO) {
+        try {
+            val response = apiService.getTournamentById(tournamentId)
+            if (response.isSuccessful) {
+                response.body()?.let { tournament ->
+                    // Convert TournamentPair to Pair
+                    val pairs = tournament.pairs.map { tournamentPair ->
+                        Pair(
+                            id = tournamentPair.id,
+                            displayName = tournamentPair.displayName,
+                            player1 = "", // Not available in detail response
+                            player2 = "", // Not available in detail response
+                            gameCount = tournamentPair.gameCount
+                        )
+                    }
+                    android.util.Log.i("TournamentRepository", "Got ${pairs.size} pairs for tournament $tournamentId")
+                    Result.success(pairs)
+                } ?: Result.failure(Exception("Empty response"))
+            } else {
+                val errorMsg = "Error: ${response.code()} - ${response.message()}"
+                android.util.Log.e("TournamentRepository", errorMsg)
+                Result.failure(Exception(errorMsg))
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("TournamentRepository", "Exception getting pairs for tournament", e)
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * Get tournament detail with full pair and game data
+     */
+    suspend fun getTournamentDetail(tournamentId: String): Result<TournamentDetail> = withContext(Dispatchers.IO) {
+        try {
+            val response = apiService.getTournamentById(tournamentId)
+            if (response.isSuccessful) {
+                response.body()?.let { tournament ->
+                    android.util.Log.i("TournamentRepository", "Got tournament detail with ${tournament.pairs.size} pairs")
+                    Result.success(tournament)
+                } ?: Result.failure(Exception("Empty response"))
+            } else {
+                val errorMsg = "Error: ${response.code()} - ${response.message()}"
+                android.util.Log.e("TournamentRepository", errorMsg)
+                Result.failure(Exception(errorMsg))
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("TournamentRepository", "Exception getting tournament detail", e)
             Result.failure(e)
         }
     }

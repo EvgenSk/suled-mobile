@@ -97,7 +97,7 @@ object TestData {
         location: String = "Central Arena",
         division: String = "Division A",
         description: String = "Annual summer tournament",
-        status: String = "Scheduled",
+        status: String = "Upcoming",
         gameCount: Int = 24,
         createdDate: String = "2025-05-01T10:00:00Z"
     ) = Tournament(
@@ -127,11 +127,12 @@ object TestData {
     }
     
     fun createTournamentsResponse(
-        tournaments: List<Tournament> = createTournaments(),
-        totalCount: Int = tournaments.size
+        tournaments: List<Tournament> = createTournaments()
     ) = TournamentsResponse(
-        tournaments = tournaments,
-        totalCount = totalCount
+        data = tournaments,
+        success = true,
+        message = "Retrieved ${tournaments.size} tournament(s)",
+        timestamp = "2026-02-12T10:00:00Z"
     )
     
     // JSON response strings for MockWebServer
@@ -183,7 +184,7 @@ object TestData {
         
         fun tournamentsResponse(tournaments: List<Tournament> = createTournaments()) = """
             {
-                "tournaments": [
+                "data": [
                     ${tournaments.joinToString(",\n") { tournament ->
             """
                     {
@@ -201,7 +202,9 @@ object TestData {
                     """.trimIndent()
         }}
                 ],
-                "totalCount": ${tournaments.size}
+                "success": true,
+                "message": "Retrieved ${tournaments.size} tournament(s)",
+                "timestamp": "2026-02-12T10:00:00Z"
             }
         """.trimIndent()
         

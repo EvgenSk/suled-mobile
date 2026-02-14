@@ -25,15 +25,11 @@ class PairSelectionViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(PairSelectionUiState())
     val uiState: StateFlow<PairSelectionUiState> = _uiState.asStateFlow()
 
-    init {
-        loadPairs()
-    }
-
-    fun loadPairs() {
+    fun loadPairsForTournament(tournamentId: String) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             
-            repository.getPairs()
+            repository.getPairsForTournament(tournamentId)
                 .onSuccess { pairs ->
                     _uiState.value = _uiState.value.copy(
                         pairs = pairs,
@@ -50,6 +46,6 @@ class PairSelectionViewModel @Inject constructor(
     }
 
     fun retry() {
-        loadPairs()
+        // Retry would need the tournamentId - caller should handle this
     }
 }

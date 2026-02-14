@@ -10,6 +10,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -96,6 +97,7 @@ class GamesViewModelTest {
 
         // When
         viewModel.loadGames(tournamentId, pairId, pairName)
+        advanceUntilIdle()
 
         // Then
         val state = viewModel.uiState.value
@@ -133,6 +135,7 @@ class GamesViewModelTest {
 
         // When
         viewModel.loadGames(tournamentId, pairId, pairName)
+        advanceUntilIdle()
 
         // Then
         assertFalse(viewModel.uiState.value.isLoading)
@@ -151,6 +154,7 @@ class GamesViewModelTest {
 
         // When
         viewModel.loadGames(tournamentId, pairId, pairName)
+        advanceUntilIdle()
 
         // Then
         val state = viewModel.uiState.value
@@ -188,6 +192,7 @@ class GamesViewModelTest {
 
         // When
         viewModel.loadGames(tournamentId, pairId, pairName)
+        advanceUntilIdle()
 
         // Then
         val state = viewModel.uiState.value
@@ -208,6 +213,7 @@ class GamesViewModelTest {
 
         // When
         viewModel.loadGames(tournamentId, pairId, pairName)
+        advanceUntilIdle()
 
         // Then
         val state = viewModel.uiState.value
@@ -243,7 +249,9 @@ class GamesViewModelTest {
 
         // When
         viewModel.loadGames(tournamentId, pairId, pairName)
+        advanceUntilIdle()
         viewModel.retry(tournamentId, pairId, pairName)
+        advanceUntilIdle()
 
         // Then
         assertFalse(viewModel.uiState.value.isLoading)
@@ -277,6 +285,7 @@ class GamesViewModelTest {
 
         // When
         viewModel.loadGames(tournamentId, pairId, pairName)
+        advanceUntilIdle()
 
         // Then
         val state = viewModel.uiState.value
@@ -322,6 +331,7 @@ class GamesViewModelTest {
 
         // When
         viewModel.loadGames(tournamentId, pairId, pairName)
+        advanceUntilIdle()
 
         // Then
         val games = viewModel.uiState.value.games

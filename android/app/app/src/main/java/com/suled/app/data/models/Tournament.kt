@@ -77,13 +77,68 @@ data class TournamentDetail(
     val createdDate: String,
     
     @SerializedName("rounds")
-    val rounds: List<TournamentRound> = emptyList()
+    val rounds: List<TournamentRound> = emptyList(),
+    
+    @SerializedName("pairs")
+    val pairs: List<TournamentPair> = emptyList()
 )
 
-data class TournamentsResponse(
-    @SerializedName("tournaments")
-    val tournaments: List<Tournament>,
+data class TournamentPair(
+    @SerializedName("id")
+    val id: String,
     
-    @SerializedName("totalCount")
-    val totalCount: Int
+    @SerializedName("displayName")
+    val displayName: String,
+    
+    @SerializedName("gameCount")
+    val gameCount: Int,
+    
+    @SerializedName("games")
+    val games: List<PairGame> = emptyList()
 )
+
+data class PairGame(
+    @SerializedName("id")
+    val id: String,
+    
+    @SerializedName("tournamentId")
+    val tournamentId: String,
+    
+    @SerializedName("round")
+    val round: Int,
+    
+    @SerializedName("courtNumber")
+    val courtNumber: Int,
+    
+    @SerializedName("opponentPair")
+    val opponentPair: OpponentPairInfo,
+    
+    @SerializedName("status")
+    val status: Int
+)
+
+data class OpponentPairInfo(
+    @SerializedName("id")
+    val id: String,
+    
+    @SerializedName("displayName")
+    val displayName: String
+)
+
+// API Response wrapper that matches backend's ApiResponse<T> format
+data class ApiResponse<T>(
+    @SerializedName("data")
+    val data: T,
+    
+    @SerializedName("success")
+    val success: Boolean,
+    
+    @SerializedName("message")
+    val message: String? = null,
+    
+    @SerializedName("timestamp")
+    val timestamp: String? = null
+)
+
+// Type aliases for specific API responses
+typealias TournamentsResponse = ApiResponse<List<Tournament>>

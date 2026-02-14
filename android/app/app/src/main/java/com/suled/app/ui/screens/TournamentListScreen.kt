@@ -14,7 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.suled.app.data.models.Tournament
 import com.suled.app.viewmodel.TournamentListViewModel
 import java.time.LocalDate
@@ -25,7 +25,7 @@ import java.time.format.FormatStyle
 @Composable
 fun TournamentListScreen(
     onTournamentSelected: (String) -> Unit,
-    viewModel: TournamentListViewModel = viewModel()
+    viewModel: TournamentListViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 

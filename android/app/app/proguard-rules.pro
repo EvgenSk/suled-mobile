@@ -60,6 +60,7 @@
 
 # Keep data classes (your models)
 -keep class com.suled.app.data.models.** { *; }
+-keep class com.suled.app.data.local.entity.** { *; }
 
 # Coroutines
 -keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
