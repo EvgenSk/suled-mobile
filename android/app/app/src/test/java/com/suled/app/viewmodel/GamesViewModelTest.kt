@@ -5,6 +5,7 @@ import com.suled.app.data.models.PairGame
 import com.suled.app.data.models.TournamentDetail
 import com.suled.app.data.models.TournamentPair
 import com.suled.app.data.repository.TournamentRepository
+import com.suled.app.ui.state.GamesUiState
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -44,11 +45,8 @@ class GamesViewModelTest {
         val repository = mockk<TournamentRepository>()
         val viewModel = GamesViewModel(repository)
 
-        // Then
-        assertTrue(viewModel.uiState.value.games.isEmpty())
-        assertFalse(viewModel.uiState.value.isLoading)
-        assertNull(viewModel.uiState.value.error)
-        assertEquals("", viewModel.uiState.value.selectedPairName)
+        // Then - initial state is Loading
+        assertTrue(viewModel.uiState.value is GamesUiState.Loading)
     }
 
     @Test
@@ -99,10 +97,9 @@ class GamesViewModelTest {
 
         // Then
         val state = viewModel.uiState.value
-        assertEquals(2, state.games.size)
+        assertTrue(state is GamesUiState.Success)
+        assertEquals(2, (state as GamesUiState.Success).games.size)
         assertEquals(pairName, state.selectedPairName)
-        assertFalse(state.isLoading)
-        assertNull(state.error)
     }
 
     @Test
@@ -135,7 +132,8 @@ class GamesViewModelTest {
         viewModel.loadGames(tournamentId, pairId, pairName)
 
         // Then
-        assertFalse(viewModel.uiState.value.isLoading)
+        val state = viewModel.uiState.value
+        assertTrue(state is GamesUiState.Success)
     }
 
     @Test
@@ -154,9 +152,8 @@ class GamesViewModelTest {
 
         // Then
         val state = viewModel.uiState.value
-        assertTrue(state.games.isEmpty())
-        assertFalse(state.isLoading)
-        assertNotNull(state.error)
+        assertTrue(state is GamesUiState.Error)
+        assertNotNull((state as GamesUiState.Error).message)
         assertEquals(pairName, state.selectedPairName)
     }
 
@@ -191,9 +188,8 @@ class GamesViewModelTest {
 
         // Then
         val state = viewModel.uiState.value
-        assertTrue(state.games.isEmpty())
-        assertFalse(state.isLoading)
-        assertNull(state.error)
+        assertTrue(state is GamesUiState.Success)
+        assertTrue((state as GamesUiState.Success).games.isEmpty())
     }
 
     @Test
@@ -211,8 +207,8 @@ class GamesViewModelTest {
 
         // Then
         val state = viewModel.uiState.value
-        assertNotNull(state.error)
-        assertEquals("Unknown error", state.error)
+        assertTrue(state is GamesUiState.Error)
+        assertEquals("Unknown error", (state as GamesUiState.Error).message)
     }
 
     @Test
@@ -246,7 +242,8 @@ class GamesViewModelTest {
         viewModel.retry(tournamentId, pairId, pairName)
 
         // Then
-        assertFalse(viewModel.uiState.value.isLoading)
+        val state = viewModel.uiState.value
+        assertTrue(state is GamesUiState.Success)
     }
 
     @Test
@@ -280,9 +277,8 @@ class GamesViewModelTest {
 
         // Then
         val state = viewModel.uiState.value
-        assertNotNull(state.error)
-        assertEquals("Pair not found in tournament", state.error)
-        assertTrue(state.games.isEmpty())
+        assertTrue(state is GamesUiState.Error)
+        assertEquals("Pair not found in tournament", (state as GamesUiState.Error).message)
     }
 
     @Test
@@ -324,7 +320,9 @@ class GamesViewModelTest {
         viewModel.loadGames(tournamentId, pairId, pairName)
 
         // Then
-        val games = viewModel.uiState.value.games
+        val state = viewModel.uiState.value
+        assertTrue(state is GamesUiState.Success)
+        val games = (state as GamesUiState.Success).games
         assertEquals(4, games.size)
         assertEquals("Scheduled", games[0].status)
         assertEquals("InProgress", games[1].status)

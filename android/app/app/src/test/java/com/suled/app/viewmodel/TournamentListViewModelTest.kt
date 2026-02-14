@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import com.suled.app.data.repository.TournamentRepository
 import com.suled.app.helpers.CoroutineTestRule
 import com.suled.app.helpers.TestData
+import com.suled.app.ui.state.TournamentListUiState
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -53,9 +54,7 @@ class TournamentListViewModelTest {
         
 
         // Then
-        assertTrue(viewModel.uiState.value.isLoading)
-        assertTrue(viewModel.uiState.value.tournaments.isEmpty())
-        assertNull(viewModel.uiState.value.error)
+        assertTrue(viewModel.uiState.value is TournamentListUiState.Loading)
     }
 
     @Test
@@ -79,10 +78,9 @@ class TournamentListViewModelTest {
 
         // Then
         val state = viewModel.uiState.value
-        assertEquals(3, state.tournaments.size)
+        assertTrue(state is TournamentListUiState.Success)
+        assertEquals(3, (state as TournamentListUiState.Success).tournaments.size)
         assertEquals(mockTournaments, state.tournaments)
-        assertFalse(state.isLoading)
-        assertNull(state.error)
 
         job.cancel()
     }
@@ -98,11 +96,21 @@ class TournamentListViewModelTest {
 
         // When
         viewModel = TournamentListViewModel(repository)
+        
+        // Collect the state to activate the StateFlow
+        val job = launch {
+            viewModel.uiState.collect {}
+        }
+        
         advanceUntilIdle()
 
-        // Then - error should be in the separate error flow
-        assertTrue(viewModel.uiState.value.tournaments.isEmpty())
-        assertEquals(errorMessage, viewModel.error.value)
+        // Then - when refresh fails but database has no data, state is Success with empty list
+        // Error state is only emitted if the flow itself throws, not when refresh fails
+        val state = viewModel.uiState.value
+        assertTrue(state is TournamentListUiState.Success)
+        assertTrue((state as TournamentListUiState.Success).tournaments.isEmpty())
+        
+        job.cancel()
     }
 
     @Test
@@ -154,7 +162,8 @@ class TournamentListViewModelTest {
     @Test
     fun `loadUpcomingTournaments sets loading state correctly`() = runTest {
         // Given
-        every { repository.observeTournamentsByStatus("Upcoming") } returns flowOf(TestData.createTournaments())
+        val tournaments = TestData.createTournaments()
+        every { repository.observeTournamentsByStatus("Upcoming") } returns flowOf(tournaments)
         coEvery {
             repository.refreshTournaments(any(), any(), any(), any(), any(), any())
         } coAnswers {
@@ -164,10 +173,18 @@ class TournamentListViewModelTest {
 
         // When
         viewModel = TournamentListViewModel(repository)
-
-        // The ViewModel should start in loading state briefly, but once the flow emits, it's not loading
-        // Instead, check the isRefreshing state during refresh
-        assertFalse(viewModel.isRefreshing.value)
+        
+        // Collect the state to activate the StateFlow
+        val job = launch {
+            viewModel.uiState.collect {}
+        }
+        
+        advanceUntilIdle()
+        
+        // The database flow emits immediately with tournaments, so state becomes Success
+        val initialState = viewModel.uiState.value
+        assertTrue(initialState is TournamentListUiState.Success)
+        assertFalse((initialState as TournamentListUiState.Success).isRefreshing)
 
         viewModel.refreshTournaments()
         // During refresh, isRefreshing should be true briefly
@@ -176,7 +193,11 @@ class TournamentListViewModelTest {
         advanceUntilIdle()
 
         // Then - not refreshing after completion
-        assertFalse(viewModel.isRefreshing.value)
+        val finalState = viewModel.uiState.value
+        assertTrue(finalState is TournamentListUiState.Success)
+        assertFalse((finalState as TournamentListUiState.Success).isRefreshing)
+        
+        job.cancel()
     }
 
     @Test
@@ -199,9 +220,8 @@ class TournamentListViewModelTest {
 
         // Then
         val state = viewModel.uiState.value
-        assertTrue(state.tournaments.isEmpty())
-        assertFalse(state.isLoading)
-        assertNull(state.error)
+        assertTrue(state is TournamentListUiState.Success)
+        assertTrue((state as TournamentListUiState.Success).tournaments.isEmpty())
 
         job.cancel()
     }
@@ -231,7 +251,8 @@ class TournamentListViewModelTest {
 
         // Then
         val state = viewModel.uiState.value
-        assertEquals(3, state.tournaments.size)
+        assertTrue(state is TournamentListUiState.Success)
+        assertEquals(3, (state as TournamentListUiState.Success).tournaments.size)
         // Verify tournaments are returned (sorting can be added in viewmodel if needed)
         assertEquals(tournaments, state.tournaments)
 

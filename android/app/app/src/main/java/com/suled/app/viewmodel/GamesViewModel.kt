@@ -3,8 +3,8 @@ package com.suled.app.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.suled.app.data.models.Game
-import com.suled.app.data.models.TournamentDetail
 import com.suled.app.data.repository.TournamentRepository
+import com.suled.app.ui.state.GamesUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,28 +13,17 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
-data class GamesUiState(
-    val games: List<Game> = emptyList(),
-    val isLoading: Boolean = false,
-    val error: String? = null,
-    val selectedPairName: String = ""
-)
-
 @HiltViewModel
 class GamesViewModel @Inject constructor(
     private val repository: TournamentRepository
 ) : ViewModel() {
     
-    private val _uiState = MutableStateFlow(GamesUiState())
+    private val _uiState = MutableStateFlow<GamesUiState>(GamesUiState.Loading)
     val uiState: StateFlow<GamesUiState> = _uiState.asStateFlow()
 
     fun loadGames(tournamentId: String, pairId: String, pairName: String) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(
-                isLoading = true,
-                error = null,
-                selectedPairName = pairName
-            )
+            _uiState.value = GamesUiState.Loading
             
             val result = repository.getTournamentDetail(tournamentId)
             when {
@@ -56,30 +45,30 @@ class GamesViewModel @Inject constructor(
                                 )
                             }
                             Timber.i("Found ${games.size} games for pair $pairId")
-                            _uiState.value = _uiState.value.copy(
+                            _uiState.value = GamesUiState.Success(
                                 games = games,
-                                isLoading = false
+                                selectedPairName = pairName
                             )
                         } else {
                             Timber.e("Pair $pairId not found in tournament")
-                            _uiState.value = _uiState.value.copy(
-                                isLoading = false,
-                                error = "Pair not found in tournament"
+                            _uiState.value = GamesUiState.Error(
+                                message = "Pair not found in tournament",
+                                selectedPairName = pairName
                             )
                         }
                     } else {
-                        _uiState.value = _uiState.value.copy(
-                            isLoading = false,
-                            error = "Tournament not found"
+                        _uiState.value = GamesUiState.Error(
+                            message = "Tournament not found",
+                            selectedPairName = pairName
                         )
                     }
                 }
                 result.isFailure -> {
                     val exception = result.exceptionOrNull()
                     Timber.e(exception, "Error loading games")
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        error = exception?.message ?: "Unknown error"
+                    _uiState.value = GamesUiState.Error(
+                        message = exception?.message ?: "Unknown error",
+                        selectedPairName = pairName
                     )
                 }
             }

@@ -13,7 +13,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.suled.app.data.models.Pair
 import com.suled.app.ui.components.PairCard
-import com.suled.app.viewmodel.PairSelectionUiState
+import com.suled.app.ui.state.PairSelectionUiState
 
 /**
  * Testable version of PairSelectionScreen that accepts state and callbacks
@@ -47,29 +47,29 @@ fun PairSelectionScreenContent(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            when {
-                uiState.isLoading -> {
+            when (val state = uiState) {
+                is PairSelectionUiState.Loading -> {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
                 
-                uiState.error != null -> {
+                is PairSelectionUiState.Error -> {
                     ErrorContent(
-                        error = uiState.error,
+                        error = state.message,
                         onRetry = onRetry
                     )
                 }
                 
-                uiState.pairs.isEmpty() -> {
-                    EmptyContent()
-                }
-                
-                else -> {
-                    PairsListContent(
-                        pairs = uiState.pairs,
-                        onPairClick = onPairClick
-                    )
+                is PairSelectionUiState.Success -> {
+                    if (state.pairs.isEmpty()) {
+                        EmptyContent()
+                    } else {
+                        PairsListContent(
+                            pairs = state.pairs,
+                            onPairClick = onPairClick
+                        )
+                    }
                 }
             }
         }

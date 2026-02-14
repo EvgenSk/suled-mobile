@@ -49,14 +49,14 @@ fun TournamentListScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            when {
-                uiState.isLoading -> {
+            when (val state = uiState) {
+                is com.suled.app.ui.state.TournamentListUiState.Loading -> {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
                 
-                uiState.error != null -> {
+                is com.suled.app.ui.state.TournamentListUiState.Error -> {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -71,7 +71,7 @@ fun TournamentListScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = uiState.error ?: "",
+                            text = state.message,
                             style = MaterialTheme.typography.bodyMedium,
                             textAlign = TextAlign.Center
                         )
@@ -82,38 +82,38 @@ fun TournamentListScreen(
                     }
                 }
                 
-                uiState.tournaments.isEmpty() -> {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            text = "No upcoming tournaments",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Check back later for new tournaments",
-                            style = MaterialTheme.typography.bodyMedium,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
-                
-                else -> {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(uiState.tournaments) { tournament ->
-                            TournamentCard(
-                                tournament = tournament,
-                                onClick = { onTournamentSelected(tournament.id) }
+                is com.suled.app.ui.state.TournamentListUiState.Success -> {
+                    if (state.tournaments.isEmpty()) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "No upcoming tournaments",
+                                style = MaterialTheme.typography.titleMedium
                             )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Check back later for new tournaments",
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(state.tournaments) { tournament ->
+                                TournamentCard(
+                                    tournament = tournament,
+                                    onClick = { onTournamentSelected(tournament.id) }
+                                )
+                            }
                         }
                     }
                 }

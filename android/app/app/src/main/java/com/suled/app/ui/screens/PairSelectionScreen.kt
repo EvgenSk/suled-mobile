@@ -52,14 +52,14 @@ fun PairSelectionScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            when {
-                uiState.isLoading -> {
+            when (val state = uiState) {
+                is com.suled.app.ui.state.PairSelectionUiState.Loading -> {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
                 
-                uiState.error != null -> {
+                is com.suled.app.ui.state.PairSelectionUiState.Error -> {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -74,7 +74,7 @@ fun PairSelectionScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = uiState.error ?: "",
+                            text = state.message,
                             style = MaterialTheme.typography.bodyMedium,
                             textAlign = TextAlign.Center
                         )
@@ -85,40 +85,40 @@ fun PairSelectionScreen(
                     }
                 }
                 
-                uiState.pairs.isEmpty() -> {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            text = "No pairs found",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Please upload a tournament file first",
-                            style = MaterialTheme.typography.bodyMedium,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
-                
-                else -> {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(uiState.pairs) { pair ->
-                            PairCard(
-                                pair = pair,
-                                onClick = {
-                                    onPairSelected(pair.id, pair.displayName)
-                                }
+                is com.suled.app.ui.state.PairSelectionUiState.Success -> {
+                    if (state.pairs.isEmpty()) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "No pairs found",
+                                style = MaterialTheme.typography.titleMedium
                             )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Please upload a tournament file first",
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(state.pairs) { pair ->
+                                PairCard(
+                                    pair = pair,
+                                    onClick = {
+                                        onPairSelected(pair.id, pair.displayName)
+                                    }
+                                )
+                            }
                         }
                     }
                 }
