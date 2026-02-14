@@ -37,7 +37,7 @@ class GamesViewModel @Inject constructor(
                                     id = pairGame.id,
                                     round = pairGame.round,
                                     courtNumber = pairGame.courtNumber,
-                                    status = getStatusString(pairGame.status),
+                                    status = pairGame.status,  // Already a string from backend
                                     pair1 = pair.displayName,
                                     pair2 = pairGame.opponentPair.displayName,
                                     isOurGame = true,
@@ -72,16 +72,6 @@ class GamesViewModel @Inject constructor(
                     )
                 }
             }
-        }
-    }
-    
-    private fun getStatusString(status: Int): String {
-        return when (status) {
-            0 -> "Scheduled"
-            1 -> "InProgress"
-            2 -> "Completed"
-            3 -> "Cancelled"
-            else -> "Unknown"
         }
     }
 

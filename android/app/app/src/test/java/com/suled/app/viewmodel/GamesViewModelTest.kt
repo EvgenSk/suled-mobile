@@ -75,7 +75,7 @@ class GamesViewModelTest {
                             round = 1,
                             courtNumber = 1,
                             opponentPair = OpponentPairInfo(id = "opp-1", displayName = "Team B"),
-                            status = 0
+                            status = "Scheduled"
                         ),
                         PairGame(
                             id = "game-2",
@@ -83,7 +83,7 @@ class GamesViewModelTest {
                             round = 2,
                             courtNumber = 2,
                             opponentPair = OpponentPairInfo(id = "opp-2", displayName = "Team C"),
-                            status = 0
+                            status = "Scheduled"
                         )
                     )
                 )
@@ -302,13 +302,13 @@ class GamesViewModelTest {
                     gameCount = 4,
                     games = listOf(
                         PairGame(id = "g1", tournamentId = tournamentId, round = 1, courtNumber = 1,
-                            opponentPair = OpponentPairInfo(id = "o1", displayName = "Opp 1"), status = 0),
+                            opponentPair = OpponentPairInfo(id = "o1", displayName = "Opp 1"), status = "Scheduled"),
                         PairGame(id = "g2", tournamentId = tournamentId, round = 2, courtNumber = 2,
-                            opponentPair = OpponentPairInfo(id = "o2", displayName = "Opp 2"), status = 1),
+                            opponentPair = OpponentPairInfo(id = "o2", displayName = "Opp 2"), status = "InProgress"),
                         PairGame(id = "g3", tournamentId = tournamentId, round = 3, courtNumber = 3,
-                            opponentPair = OpponentPairInfo(id = "o3", displayName = "Opp 3"), status = 2),
+                            opponentPair = OpponentPairInfo(id = "o3", displayName = "Opp 3"), status = "Completed"),
                         PairGame(id = "g4", tournamentId = tournamentId, round = 4, courtNumber = 4,
-                            opponentPair = OpponentPairInfo(id = "o4", displayName = "Opp 4"), status = 3)
+                            opponentPair = OpponentPairInfo(id = "o4", displayName = "Opp 4"), status = "Cancelled")
                     )
                 )
             )

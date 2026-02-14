@@ -114,7 +114,7 @@ data class PairGame(
     val opponentPair: OpponentPairInfo,
     
     @SerializedName("status")
-    val status: Int
+    val status: String  // Backend sends: "Scheduled", "InProgress", "Completed", "Cancelled"
 )
 
 data class OpponentPairInfo(
