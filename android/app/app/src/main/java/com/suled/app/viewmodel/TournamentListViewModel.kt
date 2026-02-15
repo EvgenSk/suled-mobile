@@ -88,8 +88,14 @@ class TournamentListViewModel @Inject constructor(
      * Refreshes tournament list from network API.
      * Fetches tournaments starting from today with "Upcoming" status.
      * Updates are automatically propagated through the [uiState] flow.
+     * Prevents concurrent refreshes - if already refreshing, returns immediately.
      */
     fun refreshTournaments() {
+        // Prevent concurrent refreshes
+        if (_isRefreshing.value) {
+            return
+        }
+        
         viewModelScope.launch {
             _isRefreshing.value = true
             

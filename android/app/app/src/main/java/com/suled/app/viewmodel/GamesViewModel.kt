@@ -26,6 +26,9 @@ class GamesViewModel @Inject constructor(
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow<GamesUiState>(GamesUiState.Loading)
+    private var currentTournamentId: String? = null
+    private var currentPairId: String? = null
+    private var currentPairName: String? = null
     
     /**
      * UI state flow for games screen.
@@ -44,6 +47,28 @@ class GamesViewModel @Inject constructor(
      * @param pairName Display name of the pair (for error messages)
      */
     fun loadGames(tournamentId: String, pairId: String, pairName: String) {
+        // Validate inputs
+        if (tournamentId.isBlank()) {
+            _uiState.value = GamesUiState.Error(
+                message = "Invalid tournament ID",
+                selectedPairName = pairName
+            )
+            return
+        }
+        
+        if (pairId.isBlank()) {
+            _uiState.value = GamesUiState.Error(
+                message = "Invalid pair ID",
+                selectedPairName = pairName
+            )
+            return
+        }
+        
+        // Store current parameters for retry
+        currentTournamentId = tournamentId
+        currentPairId = pairId
+        currentPairName = pairName
+        
         viewModelScope.launch {
             _uiState.value = GamesUiState.Loading
             
@@ -102,12 +127,20 @@ class GamesViewModel @Inject constructor(
 
     /**
      * Retries loading games after an error.
+     * Uses stored parameters from the previous load attempt.
+     * If parameters are provided, they override the stored ones.
      * 
-     * @param tournamentId Unique tournament identifier
-     * @param pairId Unique pair identifier within the tournament
-     * @param pairName Display name of the pair
+     * @param tournamentId Optional tournament identifier (uses stored if null)
+     * @param pairId Optional pair identifier (uses stored if null)
+     * @param pairName Optional pair name (uses stored if null)
      */
-    fun retry(tournamentId: String, pairId: String, pairName: String) {
-        loadGames(tournamentId, pairId, pairName)
+    fun retry(tournamentId: String? = null, pairId: String? = null, pairName: String? = null) {
+        val tid = tournamentId ?: currentTournamentId
+        val pid = pairId ?: currentPairId
+        val pname = pairName ?: currentPairName
+        
+        if (tid != null && pid != null && pname != null) {
+            loadGames(tid, pid, pname)
+        }
     }
 }

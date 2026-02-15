@@ -24,6 +24,7 @@ class PairSelectionViewModel @Inject constructor(
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow<PairSelectionUiState>(PairSelectionUiState.Loading)
+    private var currentTournamentId: String? = null
     
     /**
      * UI state flow for pair selection screen.
@@ -39,6 +40,14 @@ class PairSelectionViewModel @Inject constructor(
      * @param tournamentId Unique tournament identifier
      */
     fun loadPairsForTournament(tournamentId: String) {
+        // Validate input
+        if (tournamentId.isBlank()) {
+            _uiState.value = PairSelectionUiState.Error(message = "Invalid tournament ID")
+            return
+        }
+        
+        currentTournamentId = tournamentId
+        
         viewModelScope.launch {
             _uiState.value = PairSelectionUiState.Loading
             
@@ -57,9 +66,11 @@ class PairSelectionViewModel @Inject constructor(
 
     /**
      * Retries loading pairs after an error.
-     * Note: Caller must provide tournament ID since state doesn't store it.
+     * Uses the stored tournament ID from the previous load attempt.
      */
     fun retry() {
-        // Retry would need the tournamentId - caller should handle this
+        currentTournamentId?.let { tournamentId ->
+            loadPairsForTournament(tournamentId)
+        }
     }
 }

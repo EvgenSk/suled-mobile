@@ -114,15 +114,25 @@ fun TournamentListScreen(
                             verticalArrangement = Arrangement.Center
                         ) {
                             Text(
-                                text = "No upcoming tournaments",
+                                text = stringResource(R.string.empty_tournaments_title),
                                 style = MaterialTheme.typography.titleMedium
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Check back later for new tournaments",
+                                text = stringResource(R.string.empty_tournaments_message),
                                 style = MaterialTheme.typography.bodyMedium,
                                 textAlign = TextAlign.Center
                             )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Button(onClick = { viewModel.retry() }) {
+                                Icon(
+                                    imageVector = Icons.Default.Refresh,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(stringResource(R.string.action_refresh))
+                            }
                         }
                     } else {
                         LazyColumn(

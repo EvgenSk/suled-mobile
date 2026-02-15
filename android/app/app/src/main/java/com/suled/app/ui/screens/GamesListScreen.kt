@@ -57,7 +57,7 @@ fun GamesListScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { viewModel.retry(tournamentId, pairId, pairName) }) {
+                    IconButton(onClick = { viewModel.retry() }) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
                             contentDescription = "Refresh"
@@ -88,7 +88,7 @@ fun GamesListScreen(
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = "Error loading games",
+                            text = stringResource(R.string.error_loading_games),
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.error
                         )
@@ -99,7 +99,7 @@ fun GamesListScreen(
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = { viewModel.retry(tournamentId, pairId, pairName) }) {
+                        Button(onClick = { viewModel.retry() }) {
                             Text(stringResource(R.string.action_retry))
                         }
                     }
@@ -115,12 +115,12 @@ fun GamesListScreen(
                             verticalArrangement = Arrangement.Center
                         ) {
                             Text(
-                                text = "No games found",
+                                text = stringResource(R.string.empty_games_title),
                                 style = MaterialTheme.typography.titleMedium
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "This pair has no scheduled games",
+                                text = stringResource(R.string.empty_games_message),
                                 style = MaterialTheme.typography.bodyMedium,
                                 textAlign = TextAlign.Center
                             )

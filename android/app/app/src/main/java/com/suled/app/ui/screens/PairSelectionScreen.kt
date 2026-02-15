@@ -70,7 +70,7 @@ fun PairSelectionScreen(
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = "Error loading pairs",
+                            text = stringResource(R.string.error_loading_pairs),
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.error
                         )
@@ -81,8 +81,8 @@ fun PairSelectionScreen(
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = { viewModel.loadPairsForTournament(tournamentId) }) {
-                            Text("Retry")
+                        Button(onClick = { viewModel.retry() }) {
+                            Text(stringResource(R.string.action_retry))
                         }
                     }
                 }
@@ -97,12 +97,12 @@ fun PairSelectionScreen(
                             verticalArrangement = Arrangement.Center
                         ) {
                             Text(
-                                text = "No pairs found",
+                                text = stringResource(R.string.empty_pairs_title),
                                 style = MaterialTheme.typography.titleMedium
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Please upload a tournament file first",
+                                text = stringResource(R.string.empty_pairs_message),
                                 style = MaterialTheme.typography.bodyMedium,
                                 textAlign = TextAlign.Center
                             )
