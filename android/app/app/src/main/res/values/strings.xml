@@ -36,6 +36,11 @@
     <string name="error_network">Network error. Please check your connection</string>
     <string name="error_server">Server error. Please try again later</string>
     
+    <!-- Connectivity Status -->
+    <string name="status_offline">You are offline</string>
+    <string name="status_online">Connected</string>
+    <string name="status_connecting">Connecting…</string>
+    
     <!-- Game Status -->
     <string name="status_scheduled">Scheduled</string>
     <string name="status_in_progress">In Progress</string>

@@ -30,6 +30,7 @@ fun TournamentListScreen(
     viewModel: TournamentListViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val connectivityStatus by viewModel.connectivityStatus.collectAsState()
 
     Scaffold(
         topBar = {
@@ -46,11 +47,30 @@ fun TournamentListScreen(
             )
         }
     ) { paddingValues ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
+            // Show offline banner when disconnected
+            if (connectivityStatus == com.suled.app.common.connectivity.ConnectivityStatus.UNAVAILABLE) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.errorContainer
+                ) {
+                    Text(
+                        text = stringResource(R.string.status_offline),
+                        modifier = Modifier.padding(8.dp),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+            
+            Box(
+                modifier = Modifier.fillMaxSize()
+            ) {
             when (val state = uiState) {
                 is com.suled.app.ui.state.TournamentListUiState.Loading -> {
                     CircularProgressIndicator(
@@ -120,8 +140,9 @@ fun TournamentListScreen(
                     }
                 }
             }
-        }
-    }
+            } // Box
+        } // Column
+    } // Scaffold
 }
 
 @Composable

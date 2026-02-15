@@ -3,6 +3,8 @@ package com.suled.app.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.suled.app.common.Constants
+import com.suled.app.common.connectivity.ConnectivityObserver
+import com.suled.app.common.connectivity.ConnectivityStatus
 import com.suled.app.data.repository.ITournamentRepository
 import com.suled.app.ui.state.TournamentListUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,15 +17,29 @@ import javax.inject.Inject
 /**
  * ViewModel for the tournament list screen.
  * Manages tournament data with offline-first approach using local database cache.
+ * Also monitors network connectivity state to provide offline indicators.
  * 
  * @property repository Repository for accessing tournament data
+ * @property connectivityObserver Observer for monitoring network connectivity
  */
 @HiltViewModel
 class TournamentListViewModel @Inject constructor(
-    private val repository: ITournamentRepository
+    private val repository: ITournamentRepository,
+    connectivityObserver: ConnectivityObserver
 ) : ViewModel() {
     
     private val _isRefreshing = MutableStateFlow(false)
+    
+    /**
+     * Network connectivity state flow.
+     * Emits [ConnectivityStatus] whenever network state changes.
+     */
+    val connectivityStatus: StateFlow<ConnectivityStatus> = connectivityObserver.observe()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(Constants.Flow.STATE_FLOW_TIMEOUT_MILLIS),
+            initialValue = ConnectivityStatus.UNKNOWN
+        )
 
     /**
      * UI state flow combining local database tournaments with refresh state.

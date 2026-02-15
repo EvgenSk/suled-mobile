@@ -1,8 +1,11 @@
 package com.suled.app.di
 
 import android.content.Context
+import com.suled.app.common.connectivity.ConnectivityObserver
+import com.suled.app.common.connectivity.NetworkConnectivityObserver
 import com.suled.app.data.local.PreferencesManager
 import com.suled.wear.WearDataSyncService
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,5 +34,13 @@ object AppModule {
         @ApplicationContext context: Context
     ): WearDataSyncService {
         return WearDataSyncService(context)
+    }
+    
+    @Provides
+    @Singleton
+    fun provideConnectivityObserver(
+        @ApplicationContext context: Context
+    ): ConnectivityObserver {
+        return NetworkConnectivityObserver(context)
     }
 }

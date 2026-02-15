@@ -3,6 +3,7 @@ package com.suled.app.viewmodel
 import app.cash.turbine.test
 import com.suled.app.data.repository.TournamentRepository
 import com.suled.app.helpers.CoroutineTestRule
+import com.suled.app.helpers.FakeConnectivityObserver
 import com.suled.app.helpers.TestData
 import com.suled.app.ui.state.TournamentListUiState
 import io.mockk.coEvery
@@ -32,6 +33,7 @@ class TournamentListViewModelTest {
 
     private lateinit var viewModel: TournamentListViewModel
     private lateinit var repository: TournamentRepository
+    private val connectivityObserver = FakeConnectivityObserver()
 
     @Before
     fun setup() {
@@ -50,7 +52,7 @@ class TournamentListViewModelTest {
         }
 
         // When
-        viewModel = TournamentListViewModel(repository)
+        viewModel = TournamentListViewModel(repository, connectivityObserver)
         
 
         // Then
@@ -67,7 +69,7 @@ class TournamentListViewModelTest {
         } returns Result.success(Unit)
 
         // When
-        viewModel = TournamentListViewModel(repository)
+        viewModel = TournamentListViewModel(repository, connectivityObserver)
 
         // Collect the state to activate the StateFlow
         val job = launch {
@@ -95,7 +97,7 @@ class TournamentListViewModelTest {
         } returns Result.failure(IOException(errorMessage))
 
         // When
-        viewModel = TournamentListViewModel(repository)
+        viewModel = TournamentListViewModel(repository, connectivityObserver)
         
         // Collect the state to activate the StateFlow
         val job = launch {
@@ -122,7 +124,7 @@ class TournamentListViewModelTest {
         } returns Result.success(Unit)
 
         // When
-        viewModel = TournamentListViewModel(repository)
+        viewModel = TournamentListViewModel(repository, connectivityObserver)
         advanceUntilIdle()
 
         // Then
@@ -146,7 +148,7 @@ class TournamentListViewModelTest {
             repository.refreshTournaments(any(), any(), any(), any(), any(), any())
         } returns Result.success(Unit)
 
-        viewModel = TournamentListViewModel(repository)
+        viewModel = TournamentListViewModel(repository, connectivityObserver)
         advanceUntilIdle()
 
         // When
@@ -172,7 +174,7 @@ class TournamentListViewModelTest {
         }
 
         // When
-        viewModel = TournamentListViewModel(repository)
+        viewModel = TournamentListViewModel(repository, connectivityObserver)
         
         // Collect the state to activate the StateFlow
         val job = launch {
@@ -209,7 +211,7 @@ class TournamentListViewModelTest {
         } returns Result.success(Unit)
 
         // When
-        viewModel = TournamentListViewModel(repository)
+        viewModel = TournamentListViewModel(repository, connectivityObserver)
 
         // Collect the state to activate the StateFlow
         val job = launch {
@@ -240,7 +242,7 @@ class TournamentListViewModelTest {
         } returns Result.success(Unit)
 
         // When
-        viewModel = TournamentListViewModel(repository)
+        viewModel = TournamentListViewModel(repository, connectivityObserver)
 
         // Collect the state to activate the StateFlow
         val job = launch {
