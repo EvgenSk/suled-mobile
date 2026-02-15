@@ -2,6 +2,7 @@ package com.suled.app.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.suled.app.common.AppError
 import com.suled.app.data.models.Game
 import com.suled.app.data.repository.ITournamentRepository
 import com.suled.app.ui.state.GamesUiState
@@ -87,8 +88,11 @@ class GamesViewModel @Inject constructor(
                 result.isFailure -> {
                     val exception = result.exceptionOrNull()
                     Timber.e(exception, "Error loading games")
+                    val message = (exception as? AppError)?.toUserMessage()
+                        ?: exception?.message
+                        ?: "Unknown error"
                     _uiState.value = GamesUiState.Error(
-                        message = exception?.message ?: "Unknown error",
+                        message = message,
                         selectedPairName = pairName
                     )
                 }

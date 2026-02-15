@@ -2,6 +2,7 @@ package com.suled.app.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.suled.app.common.AppError
 import com.suled.app.data.repository.ITournamentRepository
 import com.suled.app.ui.state.PairSelectionUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -46,9 +47,10 @@ class PairSelectionViewModel @Inject constructor(
                     _uiState.value = PairSelectionUiState.Success(pairs = pairs)
                 }
                 .onFailure { exception ->
-                    _uiState.value = PairSelectionUiState.Error(
-                        message = exception.message ?: "Unknown error"
-                    )
+                    val message = (exception as? AppError)?.toUserMessage()
+                        ?: exception.message
+                        ?: "Unknown error"
+                    _uiState.value = PairSelectionUiState.Error(message = message)
                 }
         }
     }

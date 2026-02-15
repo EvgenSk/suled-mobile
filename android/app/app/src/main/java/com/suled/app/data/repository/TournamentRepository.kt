@@ -1,6 +1,9 @@
 package com.suled.app.data.repository
 
+import com.suled.app.common.AppError
 import com.suled.app.common.Constants
+import com.suled.app.common.httpErrorToAppError
+import com.suled.app.common.toAppError
 import com.suled.app.data.api.TournamentApiService
 import com.suled.app.data.local.dao.TournamentDao
 import com.suled.app.data.local.dao.TrackedPairDao
@@ -84,15 +87,16 @@ class TournamentRepository @Inject constructor(
                     val entities = tournaments.map { it.toEntity() }
                     tournamentDao.insertTournaments(entities)
                     Result.success(Unit)
-                } ?: Result.failure(Exception("Empty response"))
+                } ?: Result.failure(AppError.ParseError("Empty response body"))
             } else {
-                val errorMsg = "Error: ${response.code()} - ${response.message()}"
-                Timber.e(errorMsg)
-                Result.failure(Exception(errorMsg))
+                val error = httpErrorToAppError(response.code(), response.message())
+                Timber.e("Error refreshing tournaments: ${response.code()} - ${response.message()}")
+                Result.failure(error)
             }
         } catch (e: Exception) {
-            Timber.e(e, "Exception refreshing tournaments")
-            Result.failure(e)
+            val appError = e.toAppError()
+            Timber.e(e, "Exception refreshing tournaments: ${appError.toUserMessage()}")
+            Result.failure(appError)
         }
     }
 
@@ -102,12 +106,16 @@ class TournamentRepository @Inject constructor(
             if (response.isSuccessful) {
                 response.body()?.let {
                     Result.success(it.pairs)
-                } ?: Result.failure(Exception("Empty response"))
+                } ?: Result.failure(AppError.ParseError("Empty response body"))
             } else {
-                Result.failure(Exception("Error: ${response.code()} - ${response.message()}"))
+                val error = httpErrorToAppError(response.code(), response.message())
+                Timber.e("Error getting pairs: ${response.code()}")
+                Result.failure(error)
             }
         } catch (e: Exception) {
-            Result.failure(e)
+            val appError = e.toAppError()
+            Timber.e(e, "Exception getting pairs: ${appError.toUserMessage()}")
+            Result.failure(appError)
         }
     }
 
@@ -131,15 +139,16 @@ class TournamentRepository @Inject constructor(
                     }
                     Timber.i("Got ${pairs.size} pairs for tournament $tournamentId")
                     Result.success(pairs)
-                } ?: Result.failure(Exception("Empty response"))
+                } ?: Result.failure(AppError.ParseError("Empty response body"))
             } else {
-                val errorMsg = "Error: ${response.code()} - ${response.message()}"
-                Timber.e(errorMsg)
-                Result.failure(Exception(errorMsg))
+                val error = httpErrorToAppError(response.code(), response.message())
+                Timber.e("Error getting pairs for tournament $tournamentId: ${response.code()}")
+                Result.failure(error)
             }
         } catch (e: Exception) {
-            Timber.e(e, "Exception getting pairs for tournament")
-            Result.failure(e)
+            val appError = e.toAppError()
+            Timber.e(e, "Exception getting pairs for tournament: ${appError.toUserMessage()}")
+            Result.failure(appError)
         }
     }
     
@@ -153,15 +162,16 @@ class TournamentRepository @Inject constructor(
                 response.body()?.let { tournament ->
                     Timber.i("Got tournament detail with ${tournament.pairs.size} pairs")
                     Result.success(tournament)
-                } ?: Result.failure(Exception("Empty response"))
+                } ?: Result.failure(AppError.ParseError("Empty response body"))
             } else {
-                val errorMsg = "Error: ${response.code()} - ${response.message()}"
-                Timber.e(errorMsg)
-                Result.failure(Exception(errorMsg))
+                val error = httpErrorToAppError(response.code(), response.message())
+                Timber.e("Error getting tournament detail for $tournamentId: ${response.code()}")
+                Result.failure(error)
             }
         } catch (e: Exception) {
-            Timber.e(e, "Exception getting tournament detail")
-            Result.failure(e)
+            val appError = e.toAppError()
+            Timber.e(e, "Exception getting tournament detail: ${appError.toUserMessage()}")
+            Result.failure(appError)
         }
     }
 
@@ -171,12 +181,16 @@ class TournamentRepository @Inject constructor(
             if (response.isSuccessful) {
                 response.body()?.let {
                     Result.success(it.games)
-                } ?: Result.failure(Exception("Empty response"))
+                } ?: Result.failure(AppError.ParseError("Empty response body"))
             } else {
-                Result.failure(Exception("Error: ${response.code()} - ${response.message()}"))
+                val error = httpErrorToAppError(response.code(), response.message())
+                Timber.e("Error getting games for pair $pairId: ${response.code()}")
+                Result.failure(error)
             }
         } catch (e: Exception) {
-            Result.failure(e)
+            val appError = e.toAppError()
+            Timber.e(e, "Exception getting games for pair: ${appError.toUserMessage()}")
+            Result.failure(appError)
         }
     }
     
@@ -222,7 +236,9 @@ class TournamentRepository @Inject constructor(
             trackedPairDao.insertTrackedPair(entity)
             Result.success(Unit)
         } catch (e: Exception) {
-            Result.failure(e)
+            val appError = AppError.DatabaseError("Failed to track pair: ${e.message}")
+            Timber.e(e, "Exception tracking pair: ${appError.toUserMessage()}")
+            Result.failure(appError)
         }
     }
     
@@ -234,7 +250,9 @@ class TournamentRepository @Inject constructor(
             trackedPairDao.deleteTrackedPair(tournamentId, pairId)
             Result.success(Unit)
         } catch (e: Exception) {
-            Result.failure(e)
+            val appError = AppError.DatabaseError("Failed to untrack pair: ${e.message}")
+            Timber.e(e, "Exception untracking pair: ${appError.toUserMessage()}")
+            Result.failure(appError)
         }
     }
     
