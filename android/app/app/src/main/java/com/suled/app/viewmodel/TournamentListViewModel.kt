@@ -12,6 +12,12 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
+/**
+ * ViewModel for the tournament list screen.
+ * Manages tournament data with offline-first approach using local database cache.
+ * 
+ * @property repository Repository for accessing tournament data
+ */
 @HiltViewModel
 class TournamentListViewModel @Inject constructor(
     private val repository: ITournamentRepository
@@ -19,7 +25,12 @@ class TournamentListViewModel @Inject constructor(
     
     private val _isRefreshing = MutableStateFlow(false)
 
-    // Observe tournaments from database (offline-first)
+    /**
+     * UI state flow combining local database tournaments with refresh state.
+     * Emits [TournamentListUiState.Loading] initially, then
+     * [TournamentListUiState.Success] with tournament list, or
+     * [TournamentListUiState.Error] if data loading fails.
+     */
     val uiState: StateFlow<TournamentListUiState> = combine(
         repository.observeTournamentsByStatus("Upcoming"),
         _isRefreshing
@@ -58,7 +69,9 @@ class TournamentListViewModel @Inject constructor(
     }
 
     /**
-     * Refresh tournaments from network
+     * Refreshes tournament list from network API.
+     * Fetches tournaments starting from today with "Upcoming" status.
+     * Updates are automatically propagated through the [uiState] flow.
      */
     fun refreshTournaments() {
         viewModelScope.launch {
@@ -81,6 +94,10 @@ class TournamentListViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Retries loading tournaments after an error.
+     * Delegates to [refreshTournaments].
+     */
     fun retry() {
         refreshTournaments()
     }

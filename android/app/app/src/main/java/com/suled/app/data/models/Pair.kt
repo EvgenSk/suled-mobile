@@ -2,6 +2,9 @@ package com.suled.app.data.models
 
 import com.google.gson.annotations.SerializedName
 
+/**
+ * Represents a pair (team) of two players in a tournament.
+ */
 data class Pair(
     @SerializedName("id")
     val id: String,

@@ -13,14 +13,35 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
+/**
+ * ViewModel for the games list screen.
+ * Manages game data for a specific pair within a tournament.
+ * 
+ * @property repository Repository for accessing tournament and game data
+ */
 @HiltViewModel
 class GamesViewModel @Inject constructor(
     private val repository: ITournamentRepository
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow<GamesUiState>(GamesUiState.Loading)
+    
+    /**
+     * UI state flow for games screen.
+     * Emits [GamesUiState.Loading] while fetching,
+     * [GamesUiState.Success] with game list, or
+     * [GamesUiState.Error] if loading fails.
+     */
     val uiState: StateFlow<GamesUiState> = _uiState.asStateFlow()
 
+    /**
+     * Loads games for a specific pair in a tournament.
+     * Fetches tournament details and extracts games for the specified pair.
+     * 
+     * @param tournamentId Unique tournament identifier
+     * @param pairId Unique pair identifier within the tournament
+     * @param pairName Display name of the pair (for error messages)
+     */
     fun loadGames(tournamentId: String, pairId: String, pairName: String) {
         viewModelScope.launch {
             _uiState.value = GamesUiState.Loading
@@ -75,6 +96,13 @@ class GamesViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Retries loading games after an error.
+     * 
+     * @param tournamentId Unique tournament identifier
+     * @param pairId Unique pair identifier within the tournament
+     * @param pairName Display name of the pair
+     */
     fun retry(tournamentId: String, pairId: String, pairName: String) {
         loadGames(tournamentId, pairId, pairName)
     }

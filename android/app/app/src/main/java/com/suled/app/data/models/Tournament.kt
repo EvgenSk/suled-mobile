@@ -2,6 +2,11 @@ package com.suled.app.data.models
 
 import com.google.gson.annotations.SerializedName
 
+/**
+ * Tournament data model representing a beach volleyball tournament.
+ * Contains basic tournament information without detailed pair/game data.
+ * For full tournament details including pairs and games, use [TournamentDetail].
+ */
 data class Tournament(
     @SerializedName("id")
     val id: String,
@@ -34,6 +39,9 @@ data class Tournament(
     val createdDate: String
 )
 
+/**
+ * Represents a tournament round with timing and game information.
+ */
 data class TournamentRound(
     @SerializedName("roundNumber")
     val roundNumber: Int,

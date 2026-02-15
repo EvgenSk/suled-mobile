@@ -11,14 +11,32 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * ViewModel for the pair selection screen.
+ * Manages loading and displaying pairs available in a tournament.
+ * 
+ * @property repository Repository for accessing tournament and pair data
+ */
 @HiltViewModel
 class PairSelectionViewModel @Inject constructor(
     private val repository: ITournamentRepository
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow<PairSelectionUiState>(PairSelectionUiState.Loading)
+    
+    /**
+     * UI state flow for pair selection screen.
+     * Emits [PairSelectionUiState.Loading] while fetching,
+     * [PairSelectionUiState.Success] with pair list, or
+     * [PairSelectionUiState.Error] if loading fails.
+     */
     val uiState: StateFlow<PairSelectionUiState> = _uiState.asStateFlow()
 
+    /**
+     * Loads all pairs available in the specified tournament.
+     * 
+     * @param tournamentId Unique tournament identifier
+     */
     fun loadPairsForTournament(tournamentId: String) {
         viewModelScope.launch {
             _uiState.value = PairSelectionUiState.Loading
@@ -35,6 +53,10 @@ class PairSelectionViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Retries loading pairs after an error.
+     * Note: Caller must provide tournament ID since state doesn't store it.
+     */
     fun retry() {
         // Retry would need the tournamentId - caller should handle this
     }

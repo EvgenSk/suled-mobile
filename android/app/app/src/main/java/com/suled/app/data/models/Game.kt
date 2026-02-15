@@ -4,6 +4,9 @@ import com.google.gson.annotations.SerializedName
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
+/**
+ * Represents a beach volleyball game between two pairs.
+ */
 data class Game(
     @SerializedName("id")
     val id: String,
