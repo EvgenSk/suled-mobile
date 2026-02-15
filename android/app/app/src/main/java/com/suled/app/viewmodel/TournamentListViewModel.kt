@@ -2,6 +2,7 @@ package com.suled.app.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.suled.app.common.Constants
 import com.suled.app.data.repository.ITournamentRepository
 import com.suled.app.ui.state.TournamentListUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -47,7 +48,7 @@ class TournamentListViewModel @Inject constructor(
         }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.WhileSubscribed(Constants.Flow.STATE_FLOW_TIMEOUT_MILLIS),
             initialValue = TournamentListUiState.Loading
         )
 
@@ -69,7 +70,7 @@ class TournamentListViewModel @Inject constructor(
             repository.refreshTournaments(
                 startDateFrom = today,
                 status = "Upcoming",
-                maxResults = 50
+                maxResults = Constants.Api.TOURNAMENT_LIST_LIMIT
             )
                 .onSuccess {
                     _isRefreshing.value = false

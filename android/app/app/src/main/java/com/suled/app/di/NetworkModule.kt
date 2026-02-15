@@ -1,6 +1,7 @@
 package com.suled.app.di
 
 import com.suled.app.BuildConfig
+import com.suled.app.common.Constants
 import com.suled.app.data.api.TournamentApiService
 import dagger.Module
 import dagger.Provides
@@ -33,9 +34,9 @@ object NetworkModule {
         
         return OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(Constants.Network.CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .readTimeout(Constants.Network.READ_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .writeTimeout(Constants.Network.WRITE_TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .build()
     }
     

@@ -1,5 +1,6 @@
 package com.suled.app.data.repository
 
+import com.suled.app.common.Constants
 import com.suled.app.data.api.TournamentApiService
 import com.suled.app.data.local.dao.TournamentDao
 import com.suled.app.data.local.dao.TrackedPairDao
@@ -241,7 +242,7 @@ class TournamentRepository @Inject constructor(
      * Clear old cached tournaments (older than 7 days)
      */
     override suspend fun clearOldCache() = withContext(Dispatchers.IO) {
-        val sevenDaysAgo = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000)
-        tournamentDao.deleteOldTournaments(sevenDaysAgo)
+        val cacheCutoff = System.currentTimeMillis() - Constants.Database.CACHE_TTL_MILLIS
+        tournamentDao.deleteOldTournaments(cacheCutoff)
     }
 }
