@@ -12,9 +12,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.suled.app.R
 import com.suled.app.data.models.Tournament
 import com.suled.app.viewmodel.TournamentListViewModel
 import java.time.LocalDate
@@ -32,12 +34,12 @@ fun TournamentListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Upcoming Tournaments") },
+                title = { Text(stringResource(R.string.title_upcoming_tournaments)) },
                 actions = {
                     IconButton(onClick = { viewModel.retry() }) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
-                            contentDescription = "Refresh"
+                            contentDescription = stringResource(R.string.cd_refresh_button)
                         )
                     }
                 }
@@ -65,7 +67,7 @@ fun TournamentListScreen(
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = "Error loading tournaments",
+                            text = stringResource(R.string.error_loading_tournaments),
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.error
                         )
@@ -77,7 +79,7 @@ fun TournamentListScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(onClick = { viewModel.retry() }) {
-                            Text("Retry")
+                            Text(stringResource(R.string.action_retry))
                         }
                     }
                 }

@@ -13,9 +13,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.suled.app.R
 import com.suled.app.ui.components.GameCard
 import com.suled.app.viewmodel.GamesViewModel
 
@@ -39,7 +41,7 @@ fun GamesListScreen(
             TopAppBar(
                 title = { 
                     Column {
-                        Text("Your Games")
+                        Text(stringResource(R.string.title_your_games))
                         Text(
                             text = pairName,
                             style = MaterialTheme.typography.bodySmall
@@ -98,7 +100,7 @@ fun GamesListScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(onClick = { viewModel.retry(tournamentId, pairId, pairName) }) {
-                            Text("Retry")
+                            Text(stringResource(R.string.action_retry))
                         }
                     }
                 }

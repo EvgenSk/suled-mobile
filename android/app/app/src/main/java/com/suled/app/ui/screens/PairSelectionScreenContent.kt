@@ -9,8 +9,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.suled.app.R
 import com.suled.app.data.models.Pair
 import com.suled.app.ui.components.PairCard
 import com.suled.app.ui.state.PairSelectionUiState
@@ -30,12 +32,12 @@ fun PairSelectionScreenContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Select Your Pair") },
+                title = { Text(stringResource(R.string.title_select_pair)) },
                 actions = {
                     IconButton(onClick = onRetry) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
-                            contentDescription = "Refresh"
+                            contentDescription = stringResource(R.string.cd_refresh_button)
                         )
                     }
                 }
@@ -101,7 +103,7 @@ private fun ErrorContent(
         )
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = onRetry) {
-            Text("Retry")
+            Text(stringResource(R.string.action_retry))
         }
     }
 }
