@@ -3,7 +3,7 @@ package com.suled.app.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.suled.app.data.models.Game
-import com.suled.app.data.repository.TournamentRepository
+import com.suled.app.data.repository.ITournamentRepository
 import com.suled.app.ui.state.GamesUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class GamesViewModel @Inject constructor(
-    private val repository: TournamentRepository
+    private val repository: ITournamentRepository
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow<GamesUiState>(GamesUiState.Loading)

@@ -1,3 +1,56 @@
 <resources>
+    <!-- App Name -->
     <string name="app_name">Suled</string>
+    
+    <!-- Screen Titles -->
+    <string name="title_upcoming_tournaments">Upcoming Tournaments</string>
+    <string name="title_select_pair">Select Your Pair</string>
+    <string name="title_your_games">Your Games</string>
+    
+    <!-- Common Actions -->
+    <string name="action_retry">Retry</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="action_back">Back</string>
+    
+    <!-- Tournament List -->
+    <string name="empty_tournaments_title">No upcoming tournaments</string>
+    <string name="empty_tournaments_message">Check back later for new tournaments</string>
+    <string name="error_loading_tournaments">Error loading tournaments</string>
+    
+    <!-- Pair Selection -->
+    <string name="empty_pairs_title">No pairs found</string>
+    <string name="empty_pairs_message">Please upload a tournament file first</string>
+    <string name="error_loading_pairs">Error loading pairs</string>
+    
+    <!-- Games List -->
+    <string name="empty_games_title">No games available</string>
+    <string name="empty_games_message">Games will appear here once scheduled</string>
+    <string name="error_loading_games">Error loading games</string>
+    
+    <!-- Tournament Details -->
+    <string name="tournament_location_prefix">📍</string>
+    <string name="tournament_games_count">%1$d games</string>
+    
+    <!-- Error Messages -->
+    <string name="error_unknown">Unknown error occurred</string>
+    <string name="error_network">Network error. Please check your connection</string>
+    <string name="error_server">Server error. Please try again later</string>
+    
+    <!-- Game Status -->
+    <string name="status_scheduled">Scheduled</string>
+    <string name="status_in_progress">In Progress</string>
+    <string name="status_completed">Completed</string>
+    <string name="status_cancelled">Cancelled</string>
+    
+    <!-- Court & Round Labels -->
+    <string name="label_court">Court</string>
+    <string name="label_round">Round</string>
+    <string name="label_opponent">Opponent</string>
+    
+    <!-- Content Descriptions (for accessibility) -->
+    <string name="cd_back_button">Navigate back</string>
+    <string name="cd_refresh_button">Refresh content</string>
+    <string name="cd_tournament_item">Tournament item</string>
+    <string name="cd_pair_item">Pair item</string>
+    <string name="cd_game_item">Game item</string>
 </resources>

@@ -19,21 +19,21 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Repository for tournament data
- * Implements offline-first pattern: tries local cache first, then network
+ * Repository for tournament data.
+ * Implements offline-first pattern: tries local cache first, then network.
  */
 @Singleton
 class TournamentRepository @Inject constructor(
     private val apiService: TournamentApiService,
     private val tournamentDao: TournamentDao,
     private val trackedPairDao: TrackedPairDao
-) {
+) : ITournamentRepository {
 
     /**
      * Observe tournaments from local database
      * Updates happen through refresh methods
      */
-    fun observeTournaments(): Flow<List<Tournament>> {
+    override fun observeTournaments(): Flow<List<Tournament>> {
         return tournamentDao.observeAllTournaments().map { entities ->
             entities.map { it.toDomain() }
         }
@@ -42,7 +42,7 @@ class TournamentRepository @Inject constructor(
     /**
      * Observe tournaments by status from local database
      */
-    fun observeTournamentsByStatus(status: String): Flow<List<Tournament>> {
+    override fun observeTournamentsByStatus(status: String): Flow<List<Tournament>> {
         return tournamentDao.observeTournamentsByStatus(status).map { entities ->
             entities.map { it.toDomain() }
         }
@@ -51,20 +51,20 @@ class TournamentRepository @Inject constructor(
     /**
      * Get tournament by ID from local database
      */
-    suspend fun getTournamentById(tournamentId: String): Tournament? = withContext(Dispatchers.IO) {
+    override suspend fun getTournamentById(tournamentId: String): Tournament? = withContext(Dispatchers.IO) {
         tournamentDao.getTournamentById(tournamentId)?.toDomain()
     }
     
     /**
      * Refresh tournaments from network and update local cache
      */
-    suspend fun refreshTournaments(
-        startDateFrom: String? = null,
-        startDateTo: String? = null,
-        location: String? = null,
-        division: String? = null,
-        status: String? = "Upcoming",
-        maxResults: Int? = 100
+    override suspend fun refreshTournaments(
+        startDateFrom: String?,
+        startDateTo: String?,
+        location: String?,
+        division: String?,
+        status: String?,
+        maxResults: Int?
     ): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             val response = apiService.getTournaments(
@@ -95,7 +95,7 @@ class TournamentRepository @Inject constructor(
         }
     }
 
-    suspend fun getPairs(): Result<List<Pair>> = withContext(Dispatchers.IO) {
+    override suspend fun getPairs(): Result<List<Pair>> = withContext(Dispatchers.IO) {
         try {
             val response = apiService.getPairs()
             if (response.isSuccessful) {
@@ -113,7 +113,7 @@ class TournamentRepository @Inject constructor(
     /**
      * Get pairs for a specific tournament
      */
-    suspend fun getPairsForTournament(tournamentId: String): Result<List<Pair>> = withContext(Dispatchers.IO) {
+    override suspend fun getPairsForTournament(tournamentId: String): Result<List<Pair>> = withContext(Dispatchers.IO) {
         try {
             val response = apiService.getTournamentById(tournamentId)
             if (response.isSuccessful) {
@@ -145,7 +145,7 @@ class TournamentRepository @Inject constructor(
     /**
      * Get tournament detail with full pair and game data
      */
-    suspend fun getTournamentDetail(tournamentId: String): Result<TournamentDetail> = withContext(Dispatchers.IO) {
+    override suspend fun getTournamentDetail(tournamentId: String): Result<TournamentDetail> = withContext(Dispatchers.IO) {
         try {
             val response = apiService.getTournamentById(tournamentId)
             if (response.isSuccessful) {
@@ -164,7 +164,7 @@ class TournamentRepository @Inject constructor(
         }
     }
 
-    suspend fun getGamesForPair(pairId: String): Result<List<Game>> = withContext(Dispatchers.IO) {
+    override suspend fun getGamesForPair(pairId: String): Result<List<Game>> = withContext(Dispatchers.IO) {
         try {
             val response = apiService.getGamesForPair(pairId)
             if (response.isSuccessful) {
@@ -184,28 +184,28 @@ class TournamentRepository @Inject constructor(
     /**
      * Observe all tracked pairs
      */
-    fun observeTrackedPairs(): Flow<List<TrackedPairEntity>> {
+    override fun observeTrackedPairs(): Flow<List<TrackedPairEntity>> {
         return trackedPairDao.observeAllTrackedPairs()
     }
     
     /**
      * Check if pair is tracked
      */
-    suspend fun isTracked(tournamentId: String, pairId: Int): Boolean {
+    override suspend fun isTracked(tournamentId: String, pairId: Int): Boolean {
         return trackedPairDao.isTracked(tournamentId, pairId)
     }
     
     /**
      * Observe if pair is tracked
      */
-    fun observeIsTracked(tournamentId: String, pairId: Int): Flow<Boolean> {
+    override fun observeIsTracked(tournamentId: String, pairId: Int): Flow<Boolean> {
         return trackedPairDao.observeIsTracked(tournamentId, pairId)
     }
     
     /**
      * Track a pair
      */
-    suspend fun trackPair(
+    override suspend fun trackPair(
         tournamentId: String,
         tournamentName: String,
         pairId: Int,
@@ -228,7 +228,7 @@ class TournamentRepository @Inject constructor(
     /**
      * Untrack a pair
      */
-    suspend fun untrackPair(tournamentId: String, pairId: Int): Result<Unit> = withContext(Dispatchers.IO) {
+    override suspend fun untrackPair(tournamentId: String, pairId: Int): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             trackedPairDao.deleteTrackedPair(tournamentId, pairId)
             Result.success(Unit)
@@ -240,7 +240,7 @@ class TournamentRepository @Inject constructor(
     /**
      * Clear old cached tournaments (older than 7 days)
      */
-    suspend fun clearOldCache() = withContext(Dispatchers.IO) {
+    override suspend fun clearOldCache() = withContext(Dispatchers.IO) {
         val sevenDaysAgo = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000)
         tournamentDao.deleteOldTournaments(sevenDaysAgo)
     }

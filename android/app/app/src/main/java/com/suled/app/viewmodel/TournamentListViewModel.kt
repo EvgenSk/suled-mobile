@@ -2,7 +2,7 @@ package com.suled.app.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.suled.app.data.repository.TournamentRepository
+import com.suled.app.data.repository.ITournamentRepository
 import com.suled.app.ui.state.TournamentListUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class TournamentListViewModel @Inject constructor(
-    private val repository: TournamentRepository
+    private val repository: ITournamentRepository
 ) : ViewModel() {
     
     private val _isRefreshing = MutableStateFlow(false)
