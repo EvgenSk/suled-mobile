@@ -15,6 +15,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "SuledApp"
 include(":app")
-// Temporarily disabled until shared models are set up
-// include(":wear")
-// project(":wear").projectDir = file("../wear")
+include(":shared")
+project(":shared").projectDir = file("../../shared")
+include(":wear")
+project(":wear").projectDir = file("../wear")

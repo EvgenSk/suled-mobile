@@ -6,7 +6,7 @@ import androidx.wear.watchface.complications.data.*
 import androidx.wear.watchface.complications.datasource.ComplicationRequest
 import androidx.wear.watchface.complications.datasource.SuspendingComplicationDataSourceService
 import com.suled.data.createWatchLocalStorageService
-import com.suled.R
+import com.suled.wear.R
 
 /**
  * Wear OS Complication showing next upcoming game

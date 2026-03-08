@@ -3,8 +3,10 @@ package com.suled.wear
 import android.content.Context
 import com.google.android.gms.wearable.*
 import com.suled.data.createWatchLocalStorageService
+import com.suled.models.NextGameInfo
 import com.suled.models.TrackedPair
 import com.suled.models.TournamentData
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
@@ -25,6 +27,8 @@ class WearDataListenerService : WearableListenerService() {
     companion object {
         private const val TRACKED_PAIRS_PATH = "/suled/tracked_pairs"
         private const val TOURNAMENT_PATH_PREFIX = "/suled/tournament/"
+        /** Live next-game state — observed by MainActivity for real-time UI updates. */
+        val nextGame = MutableStateFlow<NextGameInfo?>(null)
     }
     
     override fun onDataChanged(dataEvents: DataEventBuffer) {
@@ -95,9 +99,12 @@ class WearDataListenerService : WearableListenerService() {
     }
     
     /**
-     * Request update of all complications showing Suled data
+     * Request update of all complications showing Suled data.
+     * Also refreshes the in-memory StateFlow so MainActivity updates immediately.
      */
     private fun updateComplications() {
+        // Update in-memory state for any active MainActivity observer
+        nextGame.value = localStorage.getNextGame()
         try {
             // Request update of NextGameComplication
             val componentName = android.content.ComponentName(

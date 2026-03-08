@@ -130,95 +130,86 @@ class LocalStorageService(private val provider: LocalStorageProvider) {
     }
     
     /**
-     * Get all upcoming games for tracked pairs
+     * Get all upcoming games for tracked pairs, sorted by round number.
+     * Single-day tournaments only: round number is the natural time order.
      */
     fun getUpcomingGames(): List<UpcomingGame> {
         val trackedPairs = getTrackedPairs()
         val upcomingGames = mutableListOf<UpcomingGame>()
         val now = Clock.System.now()
-        
+
         for (tracked in trackedPairs) {
             val tournament = getCachedTournament(tracked.tournamentId) ?: continue
             val pair = tournament.pairs.find { it.id == tracked.pairId } ?: continue
-            
-            val tournamentDate = tournament.startDate?.let { 
+
+            val tournamentDate = tournament.startDate?.let {
                 try {
-                    LocalDate.parse(it).atStartOfDayIn(TimeZone.currentSystemDefault())
-                } catch (e: Exception) {
-                    null
-                }
-            } ?: continue
-            
-            // Process each game for this pair
+                    val datePart = if (it.length > 10) it.substring(0, 10) else it
+                    LocalDate.parse(datePart).atStartOfDayIn(TimeZone.currentSystemDefault())
+                } catch (e: Exception) { null }
+            }
+
             for (game in pair.games) {
-                val round = tournament.rounds.find { it.roundNumber == game.round } ?: continue
-                
-                // Parse round start time (format: HH:mm:ss)
-                val timeParts = round.startTime.split(":")
-                if (timeParts.size < 2) continue
-                
-                val hours = timeParts[0].toIntOrNull() ?: continue
-                val minutes = timeParts[1].toIntOrNull() ?: continue
-                val seconds = if (timeParts.size > 2) timeParts[2].toIntOrNull() ?: 0 else 0
-                
-                // Calculate game time
-                val gameTime = tournamentDate.plus(hours, DateTimeUnit.HOUR)
-                    .plus(minutes, DateTimeUnit.MINUTE)
-                    .plus(seconds, DateTimeUnit.SECOND)
-                
-                // Only include upcoming games (within next 24 hours)
-                val duration = gameTime - now
-                if (duration.inWholeHours in 0..24) {
-                    upcomingGames.add(
-                        UpcomingGame(
-                            tournamentId = tournament.id,
-                            tournamentName = tournament.name,
-                            pairId = tracked.pairId,
-                            pairDisplayName = tracked.pairDisplayName,
-                            round = game.round,
-                            courtNumber = game.courtNumber,
-                            opponentPairName = game.opponentName,
-                            scheduledTime = gameTime.toString(),
-                            status = when (game.status) {
-                                0 -> "Scheduled"
-                                1 -> "InProgress"
-                                2 -> "Completed"
-                                else -> "Unknown"
-                            }
-                        )
+                // Skip already-completed games
+                if (game.status == 2) continue
+
+                val round = tournament.rounds.find { it.roundNumber == game.round }
+
+                // Best-effort scheduled time calculation; null = we don't know yet
+                val scheduledInstant: Instant? = if (tournamentDate != null && round != null) {
+                    try {
+                        val parts = round.startTime.split(":")
+                        val h = parts.getOrNull(0)?.toIntOrNull() ?: 0
+                        val m = parts.getOrNull(1)?.toIntOrNull() ?: 0
+                        // Fractional seconds from C# TimeOnly ("00.0000000") – take integer part only
+                        val s = parts.getOrNull(2)?.substringBefore('.')?.toIntOrNull() ?: 0
+                        tournamentDate
+                            .plus(h, DateTimeUnit.HOUR)
+                            .plus(m, DateTimeUnit.MINUTE)
+                            .plus(s, DateTimeUnit.SECOND)
+                    } catch (e: Exception) { null }
+                } else null
+
+                // Skip games that started more than 10 minutes ago (not yet marked complete by backend)
+                if (scheduledInstant != null && (now - scheduledInstant).inWholeMinutes > 10) continue
+
+                upcomingGames.add(
+                    UpcomingGame(
+                        tournamentId = tournament.id,
+                        tournamentName = tournament.name,
+                        pairId = tracked.pairId,
+                        pairDisplayName = tracked.pairDisplayName,
+                        round = game.round,
+                        courtNumber = game.courtNumber,
+                        opponentPairName = game.opponentName,
+                        scheduledTime = scheduledInstant?.toString() ?: "",
+                        status = when (game.status) {
+                            0 -> "Scheduled"
+                            1 -> "InProgress"
+                            else -> "Unknown"
+                        }
                     )
-                }
+                )
             }
         }
-        
-        // Sort by scheduled time
-        return upcomingGames.sortedBy { 
-            try {
-                Instant.parse(it.scheduledTime)
-            } catch (e: Exception) {
-                Instant.DISTANT_FUTURE
-            }
-        }
+
+        // Sort by round number — reliable time order for single-day tournaments
+        return upcomingGames.sortedBy { it.round }
     }
-    
+
     /**
-     * Get the next game (soonest upcoming game)
+     * Get the next game (lowest round number that isn't completed).
      */
     fun getNextGame(): NextGameInfo? {
-        val upcomingGames = getUpcomingGames()
-        if (upcomingGames.isEmpty()) return null
-        
-        val nextGame = upcomingGames.first()
+        val nextGame = getUpcomingGames().firstOrNull() ?: return null
         val now = Clock.System.now()
-        
-        val scheduledTime = try {
-            Instant.parse(nextGame.scheduledTime)
-        } catch (e: Exception) {
-            return null
-        }
-        
-        val minutesUntilStart = ((scheduledTime - now).inWholeSeconds / 60).toInt()
-        
+
+        val minutesUntilStart = if (nextGame.scheduledTime.isNotEmpty()) {
+            try {
+                ((Instant.parse(nextGame.scheduledTime) - now).inWholeSeconds / 60).toInt()
+            } catch (e: Exception) { 0 }
+        } else 0
+
         return NextGameInfo(
             tournamentName = nextGame.tournamentName,
             pairDisplayName = nextGame.pairDisplayName,

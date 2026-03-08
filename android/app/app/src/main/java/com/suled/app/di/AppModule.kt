@@ -4,6 +4,7 @@ import android.content.Context
 import com.suled.app.common.connectivity.ConnectivityObserver
 import com.suled.app.common.connectivity.NetworkConnectivityObserver
 import com.suled.app.data.local.PreferencesManager
+import com.suled.app.data.local.dao.TrackedPairDao
 import com.suled.wear.WearDataSyncService
 import dagger.Binds
 import dagger.Module
@@ -31,9 +32,10 @@ object AppModule {
     @Provides
     @Singleton
     fun provideWearDataSyncService(
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
+        trackedPairDao: TrackedPairDao
     ): WearDataSyncService {
-        return WearDataSyncService(context)
+        return WearDataSyncService(context, trackedPairDao)
     }
     
     @Provides

@@ -43,12 +43,6 @@ fun PairCard(
                     text = pair.displayName,
                     style = MaterialTheme.typography.titleMedium
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "${pair.player1} & ${pair.player2}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
         }
     }

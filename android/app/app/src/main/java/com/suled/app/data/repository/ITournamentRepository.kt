@@ -52,7 +52,7 @@ interface ITournamentRepository {
         startDateTo: String? = null,
         location: String? = null,
         division: String? = null,
-        status: String? = "Upcoming",
+        status: String? = null,
         maxResults: Int? = 100
     ): Result<Unit>
     

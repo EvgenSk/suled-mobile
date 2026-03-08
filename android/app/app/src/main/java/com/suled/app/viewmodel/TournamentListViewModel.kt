@@ -48,7 +48,7 @@ class TournamentListViewModel @Inject constructor(
      * [TournamentListUiState.Error] if data loading fails.
      */
     val uiState: StateFlow<TournamentListUiState> = combine(
-        repository.observeTournamentsByStatus("Upcoming"),
+        repository.observeTournaments(),
         _isRefreshing
     ) { tournaments, isRefreshing ->
         if (tournaments.isNotEmpty()) {
@@ -104,7 +104,6 @@ class TournamentListViewModel @Inject constructor(
             
             repository.refreshTournaments(
                 startDateFrom = today,
-                status = "Upcoming",
                 maxResults = Constants.Api.TOURNAMENT_LIST_LIMIT
             )
                 .onSuccess {

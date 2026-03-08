@@ -6,6 +6,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,6 +33,7 @@ fun GamesListScreen(
     viewModel: GamesViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val isTracked by viewModel.isTracked.collectAsState()
 
     LaunchedEffect(tournamentId, pairId) {
         viewModel.loadGames(tournamentId, pairId, pairName)
@@ -57,6 +60,17 @@ fun GamesListScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = {
+                        if (isTracked) viewModel.untrackCurrentPair()
+                        else viewModel.trackCurrentPair()
+                    }) {
+                        Icon(
+                            imageVector = if (isTracked) Icons.Filled.Star else Icons.Outlined.Star,
+                            contentDescription = if (isTracked) "Untrack pair" else "Track on watch",
+                            tint = if (isTracked) MaterialTheme.colorScheme.primary
+                                   else MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                     IconButton(onClick = { viewModel.retry() }) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
