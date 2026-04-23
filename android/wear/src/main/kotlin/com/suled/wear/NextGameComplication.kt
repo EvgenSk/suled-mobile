@@ -77,16 +77,18 @@ class NextGameComplication : SuspendingComplicationDataSourceService() {
         }
     }
     
-    private fun buildShortText(game: com.suled.models.NextGameInfo): ShortTextComplicationData {
-        val timeText = when {
-            game.minutesUntilStart >= -3 -> "Now"
-            game.minutesUntilStart < 60 -> "${game.minutesUntilStart}m"
-            else -> {
-                val hours = game.minutesUntilStart / 60
-                val mins = game.minutesUntilStart % 60
-                "${hours}h${mins}m"
-            }
+    private fun formatTimeUntil(minutes: Int, longFormat: Boolean = false): String = when {
+        minutes >= -3 -> "Now"
+        minutes < 60  -> if (longFormat) "in $minutes min" else "${minutes}m"
+        else -> {
+            val h = minutes / 60
+            val m = minutes % 60
+            if (longFormat) "in ${h}h ${m}m" else "${h}h${m}m"
         }
+    }
+
+    private fun buildShortText(game: com.suled.models.NextGameInfo): ShortTextComplicationData {
+        val timeText = formatTimeUntil(game.minutesUntilStart)
         
         return ShortTextComplicationData.Builder(
             text = PlainComplicationText.Builder("Court ${game.courtNumber}").build(),
@@ -104,15 +106,7 @@ class NextGameComplication : SuspendingComplicationDataSourceService() {
     }
     
     private fun buildLongText(game: com.suled.models.NextGameInfo): LongTextComplicationData {
-        val timeText = when {
-            game.minutesUntilStart >= -3 -> "Now"
-            game.minutesUntilStart < 60 -> "in ${game.minutesUntilStart} min"
-            else -> {
-                val hours = game.minutesUntilStart / 60
-                val mins = game.minutesUntilStart % 60
-                "in ${hours}h ${mins}m"
-            }
-        }
+        val timeText = formatTimeUntil(game.minutesUntilStart, longFormat = true)
         
         return LongTextComplicationData.Builder(
             text = PlainComplicationText.Builder(
@@ -132,14 +126,8 @@ class NextGameComplication : SuspendingComplicationDataSourceService() {
     }
     
     private fun buildRangedValue(game: com.suled.models.NextGameInfo): RangedValueComplicationData {
-        // Show time as progress (0-60 minutes range)
         val value = game.minutesUntilStart.coerceIn(0, 60).toFloat()
-        
-        val timeText = when {
-            game.minutesUntilStart >= -3 -> "Now"
-            game.minutesUntilStart == 0 -> "0m"
-            else -> "${game.minutesUntilStart}m"
-        }
+        val timeText = formatTimeUntil(game.minutesUntilStart)
         
         return RangedValueComplicationData.Builder(
             value = value,

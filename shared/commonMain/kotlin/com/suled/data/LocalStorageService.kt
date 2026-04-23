@@ -134,67 +134,66 @@ class LocalStorageService(private val provider: LocalStorageProvider) {
      * Single-day tournaments only: round number is the natural time order.
      */
     fun getUpcomingGames(): List<UpcomingGame> {
-        val trackedPairs = getTrackedPairs()
-        val upcomingGames = mutableListOf<UpcomingGame>()
         val now = Clock.System.now()
+        return getTrackedPairs()
+            .flatMap { tracked -> upcomingGamesForTracked(tracked, now) }
+            .sortedBy { it.round }
+    }
 
-        for (tracked in trackedPairs) {
-            val tournament = getCachedTournament(tracked.tournamentId) ?: continue
-            val pair = tournament.pairs.find { it.id == tracked.pairId } ?: continue
+    private fun upcomingGamesForTracked(tracked: TrackedPair, now: Instant): List<UpcomingGame> {
+        val tournament = getCachedTournament(tracked.tournamentId) ?: return emptyList()
+        val pair = tournament.pairs.find { it.id == tracked.pairId } ?: return emptyList()
+        val tournamentDate = parseTournamentDate(tournament.startDate)
 
-            val tournamentDate = tournament.startDate?.let {
-                try {
-                    val datePart = if (it.length > 10) it.substring(0, 10) else it
-                    LocalDate.parse(datePart).atStartOfDayIn(TimeZone.currentSystemDefault())
-                } catch (e: Exception) { null }
-            }
-
-            for (game in pair.games) {
-                // Skip already-completed games
-                if (game.status == 2) continue
-
-                val round = tournament.rounds.find { it.roundNumber == game.round }
-
-                // Best-effort scheduled time calculation; null = we don't know yet
-                val scheduledInstant: Instant? = if (tournamentDate != null && round != null) {
-                    try {
-                        val parts = round.startTime.split(":")
-                        val h = parts.getOrNull(0)?.toIntOrNull() ?: 0
-                        val m = parts.getOrNull(1)?.toIntOrNull() ?: 0
-                        // Fractional seconds from C# TimeOnly ("00.0000000") – take integer part only
-                        val s = parts.getOrNull(2)?.substringBefore('.')?.toIntOrNull() ?: 0
-                        tournamentDate
-                            .plus(h, DateTimeUnit.HOUR)
-                            .plus(m, DateTimeUnit.MINUTE)
-                            .plus(s, DateTimeUnit.SECOND)
-                    } catch (e: Exception) { null }
-                } else null
-
+        return pair.games
+            .filter { it.status != 2 }
+            .mapNotNull { game ->
+                val scheduledInstant = parseScheduledInstant(
+                    tournamentDate,
+                    tournament.rounds.find { it.roundNumber == game.round }
+                )
                 // Skip games that started more than 10 minutes ago (not yet marked complete by backend)
-                if (scheduledInstant != null && (now - scheduledInstant).inWholeMinutes > 10) continue
-
-                upcomingGames.add(
-                    UpcomingGame(
-                        tournamentId = tournament.id,
-                        tournamentName = tournament.name,
-                        pairId = tracked.pairId,
-                        pairDisplayName = tracked.pairDisplayName,
-                        round = game.round,
-                        courtNumber = game.courtNumber,
-                        opponentPairName = game.opponentName,
-                        scheduledTime = scheduledInstant?.toString() ?: "",
-                        status = when (game.status) {
-                            0 -> "Scheduled"
-                            1 -> "InProgress"
-                            else -> "Unknown"
-                        }
-                    )
+                if (scheduledInstant != null && (now - scheduledInstant).inWholeMinutes > 10) return@mapNotNull null
+                UpcomingGame(
+                    tournamentId = tournament.id,
+                    tournamentName = tournament.name,
+                    pairId = tracked.pairId,
+                    pairDisplayName = tracked.pairDisplayName,
+                    round = game.round,
+                    courtNumber = game.courtNumber,
+                    opponentPairName = game.opponentName,
+                    scheduledTime = scheduledInstant?.toString() ?: "",
+                    status = gameStatusString(game.status)
                 )
             }
-        }
+    }
 
-        // Sort by round number — reliable time order for single-day tournaments
-        return upcomingGames.sortedBy { it.round }
+    private fun parseTournamentDate(startDate: String?): Instant? = startDate?.let {
+        runCatching {
+            val datePart = if (it.length > 10) it.substring(0, 10) else it
+            LocalDate.parse(datePart).atStartOfDayIn(TimeZone.currentSystemDefault())
+        }.getOrNull()
+    }
+
+    // Fractional seconds from C# TimeOnly ("00.0000000") — take integer part only
+    private fun parseScheduledInstant(tournamentDate: Instant?, round: RoundData?): Instant? {
+        if (tournamentDate == null || round == null) return null
+        return runCatching {
+            val parts = round.startTime.split(":")
+            val h = parts.getOrNull(0)?.toIntOrNull() ?: 0
+            val m = parts.getOrNull(1)?.toIntOrNull() ?: 0
+            val s = parts.getOrNull(2)?.substringBefore('.')?.toIntOrNull() ?: 0
+            tournamentDate
+                .plus(h, DateTimeUnit.HOUR)
+                .plus(m, DateTimeUnit.MINUTE)
+                .plus(s, DateTimeUnit.SECOND)
+        }.getOrNull()
+    }
+
+    private fun gameStatusString(status: Int): String = when (status) {
+        0 -> "Scheduled"
+        1 -> "InProgress"
+        else -> "Unknown"
     }
 
     /**
