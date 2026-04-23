@@ -18,9 +18,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import timber.log.Timber
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import javax.inject.Singleton
+import timber.log.Timber
 
 /**
  * Repository for tournament data.
@@ -86,6 +88,10 @@ class TournamentRepository @Inject constructor(
                     // Save to local database
                     val entities = tournaments.map { it.toEntity() }
                     tournamentDao.insertTournaments(entities)
+                    // Remove tournaments from past days — they are stale since the
+                    // refresh only fetches from today onward and won't update them.
+                    val today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
+                    tournamentDao.deletePastTournaments(today)
                     Result.success(Unit)
                 } ?: Result.failure(AppError.ParseError("Empty response body"))
             } else {

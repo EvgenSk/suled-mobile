@@ -9,6 +9,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.suled.app.data.models.Tournament
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
@@ -45,7 +47,7 @@ fun TournamentCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = tournament.startDate?.let { formatTournamentDate(it) } ?: "Date TBD",
+                    text = tournament.startDate?.let { formatTournamentDate(it, tournament.startTime) } ?: "Date TBD",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -110,11 +112,25 @@ fun TournamentCard(
     }
 }
 
-private fun formatTournamentDate(dateString: String): String {
-    return try {
-        val date = LocalDate.parse(dateString, DateTimeFormatter.ISO_LOCAL_DATE)
+private fun formatTournamentDate(dateString: String, startTime: String? = null): String {
+    val datePart = try {
+        val date = try {
+            LocalDateTime.parse(dateString, DateTimeFormatter.ISO_LOCAL_DATE_TIME).toLocalDate()
+        } catch (e: Exception) {
+            LocalDate.parse(dateString, DateTimeFormatter.ISO_LOCAL_DATE)
+        }
         date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
     } catch (e: Exception) {
         dateString
     }
+
+    val timePart = startTime?.let {
+        try {
+            val time = LocalTime.parse(it, DateTimeFormatter.ofPattern("HH:mm:ss"))
+            time.format(DateTimeFormatter.ofPattern("HH:mm"))
+        } catch (e: Exception) { null }
+    }
+
+    return if (timePart != null) "\uD83D\uDCC5 $datePart \uD83D\uDD50 $timePart"
+    else "\uD83D\uDCC5 $datePart"
 }

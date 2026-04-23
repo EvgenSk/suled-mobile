@@ -1,150 +1,83 @@
 package com.suled.app.data.models
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.Serializable
 
 /**
  * Tournament data model representing a beach volleyball tournament.
  * Contains basic tournament information without detailed pair/game data.
  * For full tournament details including pairs and games, use [TournamentDetail].
  */
+@Serializable
 data class Tournament(
-    @SerializedName("id")
     val id: String,
-    
-    @SerializedName("name")
     val name: String,
-    
-    @SerializedName("startDate")
-    val startDate: String?,
-    
-    @SerializedName("endDate")
-    val endDate: String?,
-    
-    @SerializedName("location")
+    val startDate: String? = null,
+    val endDate: String? = null,
     val location: String = "",
-    
-    @SerializedName("division")
     val division: String = "",
-    
-    @SerializedName("description")
     val description: String = "",
-    
-    @SerializedName("status")
     val status: String,
-    
-    @SerializedName("gameCount")
+    val startTime: String? = null,
     val gameCount: Int,
-    
-    @SerializedName("createdDate")
     val createdDate: String
 )
 
 /**
  * Represents a tournament round with timing and game information.
  */
+@Serializable
 data class TournamentRound(
-    @SerializedName("roundNumber")
     val roundNumber: Int,
-    
-    @SerializedName("startTime")
     val startTime: String,
-    
-    @SerializedName("endTime")
     val endTime: String,
-    
-    @SerializedName("gameCount")
     val gameCount: Int
 )
 
+@Serializable
 data class TournamentDetail(
-    @SerializedName("id")
     val id: String,
-    
-    @SerializedName("name")
     val name: String,
-    
-    @SerializedName("startDate")
-    val startDate: String?,
-    
-    @SerializedName("endDate")
-    val endDate: String?,
-    
-    @SerializedName("location")
+    val startDate: String? = null,
+    val endDate: String? = null,
     val location: String = "",
-    
-    @SerializedName("division")
     val division: String = "",
-    
-    @SerializedName("description")
     val description: String = "",
-    
-    @SerializedName("status")
     val status: String,
-    
-    @SerializedName("createdDate")
     val createdDate: String,
-    
-    @SerializedName("rounds")
     val rounds: List<TournamentRound> = emptyList(),
-    
-    @SerializedName("pairs")
     val pairs: List<TournamentPair> = emptyList()
 )
 
+@Serializable
 data class TournamentPair(
-    @SerializedName("id")
     val id: String,
-    
-    @SerializedName("displayName")
     val displayName: String,
-    
-    @SerializedName("gameCount")
     val gameCount: Int,
-    
-    @SerializedName("games")
     val games: List<PairGame> = emptyList()
 )
 
+@Serializable
 data class PairGame(
-    @SerializedName("id")
     val id: String,
-    
-    @SerializedName("tournamentId")
     val tournamentId: String,
-    
-    @SerializedName("round")
     val round: Int,
-    
-    @SerializedName("courtNumber")
     val courtNumber: Int,
-    
-    @SerializedName("opponentPair")
     val opponentPair: OpponentPairInfo,
-    
-    @SerializedName("status")
     val status: String  // Backend sends: "Scheduled", "InProgress", "Completed", "Cancelled"
 )
 
+@Serializable
 data class OpponentPairInfo(
-    @SerializedName("id")
     val id: String,
-    
-    @SerializedName("displayName")
     val displayName: String
 )
 
 // API Response wrapper that matches backend's ApiResponse<T> format
+@Serializable
 data class ApiResponse<T>(
-    @SerializedName("data")
     val data: T,
-    
-    @SerializedName("success")
     val success: Boolean,
-    
-    @SerializedName("message")
     val message: String? = null,
-    
-    @SerializedName("timestamp")
     val timestamp: String? = null
 )
 

@@ -1,7 +1,7 @@
 package com.suled.wear
 
 import android.content.Context
-import com.google.android.gms.tasks.Tasks
+import com.google.android.gms.tasks.Task
 import com.google.android.gms.wearable.DataClient
 import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
@@ -13,20 +13,26 @@ import com.suled.models.RoundData
 import com.suled.models.TrackedPair
 import com.suled.models.TournamentData
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import timber.log.Timber
 import java.time.Instant
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 /**
  * Service to sync tracked pairs and tournament data from phone to watch.
  * Uses Wear OS Data Layer API.
+ *
+ * @param scope Application-lifetime scope; callers must NOT pass a locally-created scope.
  */
 class WearDataSyncService(
     private val context: Context,
-    private val trackedPairDao: TrackedPairDao
-) {
+    private val trackedPairDao: TrackedPairDao,
+    private val scope: CoroutineScope
+) : WearSyncService {
 
     private val dataClient: DataClient by lazy { Wearable.getDataClient(context) }
 
@@ -34,8 +40,6 @@ class WearDataSyncService(
         ignoreUnknownKeys = true
         prettyPrint = false
     }
-
-    private val scope = CoroutineScope(Dispatchers.IO)
 
     companion object {
         private const val TRACKED_PAIRS_PATH = "/suled/tracked_pairs"
@@ -49,11 +53,17 @@ class WearDataSyncService(
         )
     }
 
+    /** Suspending wrapper around a GMS [Task] — avoids blocking thread with Tasks.await(). */
+    private suspend fun <T> Task<T>.await(): T = suspendCancellableCoroutine { cont ->
+        addOnSuccessListener { result -> cont.resume(result) }
+        addOnFailureListener { e -> cont.resumeWithException(e) }
+    }
+
     /**
      * Sync all tracked pairs (read from Room DB) to the watch.
      * Call this whenever the tracked pairs list changes.
      */
-    fun syncTrackedPairs() {
+    override fun syncTrackedPairs() {
         scope.launch {
             try {
                 val entities = trackedPairDao.getAllTrackedPairs()
@@ -73,9 +83,9 @@ class WearDataSyncService(
                     dataMap.putLong("timestamp", System.currentTimeMillis())
                 }.asPutDataRequest().setUrgent()
 
-                Tasks.await(dataClient.putDataItem(putDataReq))
+                dataClient.putDataItem(putDataReq).await()
             } catch (e: Exception) {
-                e.printStackTrace()
+                Timber.e(e, "Failed to sync tracked pairs to watch")
             }
         }
     }
@@ -84,7 +94,7 @@ class WearDataSyncService(
      * Map a [TournamentDetail] (phone API model) to [TournamentData] (watch model)
      * and sync it to the watch via the Data Layer.
      */
-    fun syncTournamentDetail(tournament: TournamentDetail) {
+    override fun syncTournamentDetail(tournament: TournamentDetail) {
         scope.launch {
             try {
                 val tournamentData = TournamentData(
@@ -121,9 +131,9 @@ class WearDataSyncService(
                         )
                     }
                 )
-                syncTournament(tournamentData)
+                syncTournamentData(tournamentData)
             } catch (e: Exception) {
-                e.printStackTrace()
+                Timber.e(e, "Failed to sync tournament detail for ${tournament.id}")
             }
         }
     }
@@ -131,22 +141,16 @@ class WearDataSyncService(
     /**
      * Sync a pre-built [TournamentData] to the watch.
      */
-    fun syncTournament(tournament: TournamentData) {
-        scope.launch {
-            try {
-                val tournamentJson = json.encodeToString(tournament)
-                val path = "$TOURNAMENT_PATH_PREFIX${tournament.id}"
+    private suspend fun syncTournamentData(tournament: TournamentData) {
+        val tournamentJson = json.encodeToString(tournament)
+        val path = "$TOURNAMENT_PATH_PREFIX${tournament.id}"
 
-                val putDataReq = PutDataMapRequest.create(path).apply {
-                    dataMap.putString("tournament", tournamentJson)
-                    dataMap.putLong("timestamp", System.currentTimeMillis())
-                }.asPutDataRequest().setUrgent()
+        val putDataReq = PutDataMapRequest.create(path).apply {
+            dataMap.putString("tournament", tournamentJson)
+            dataMap.putLong("timestamp", System.currentTimeMillis())
+        }.asPutDataRequest().setUrgent()
 
-                Tasks.await(dataClient.putDataItem(putDataReq))
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
+        dataClient.putDataItem(putDataReq).await()
     }
 
     /**
@@ -154,9 +158,9 @@ class WearDataSyncService(
      */
     suspend fun isWatchConnected(): Boolean {
         return try {
-            val nodes = Tasks.await(Wearable.getNodeClient(context).connectedNodes)
-            nodes.isNotEmpty()
+            Wearable.getNodeClient(context).connectedNodes.await().isNotEmpty()
         } catch (e: Exception) {
+            Timber.e(e, "Failed to check watch connectivity")
             false
         }
     }

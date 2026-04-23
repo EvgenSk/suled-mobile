@@ -7,13 +7,17 @@ import com.suled.app.data.models.Game
 import com.suled.app.data.models.TournamentDetail
 import com.suled.app.data.repository.ITournamentRepository
 import com.suled.app.ui.state.GamesUiState
-import com.suled.wear.WearDataSyncService
+import com.suled.wear.WearSyncService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 /**
@@ -21,12 +25,12 @@ import javax.inject.Inject
  * Manages game data for a specific pair within a tournament.
  *
  * @property repository Repository for accessing tournament and game data
- * @property wearDataSyncService Service for syncing data to the watch
+ * @property wearSyncService Service for syncing data to the watch
  */
 @HiltViewModel
 class GamesViewModel @Inject constructor(
     private val repository: ITournamentRepository,
-    private val wearDataSyncService: WearDataSyncService
+    private val wearSyncService: WearSyncService
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<GamesUiState>(GamesUiState.Loading)
@@ -91,22 +95,26 @@ class GamesViewModel @Inject constructor(
                         // Check tracking status and sync to watch
                         val pairIdInt = pairId.toIntOrNull() ?: pairId.hashCode()
                         _isTracked.value = repository.isTracked(tournamentId, pairIdInt)
-                        wearDataSyncService.syncTournamentDetail(tournament)
+                        wearSyncService.syncTournamentDetail(tournament)
 
                         val pair = tournament.pairs.find { it.id == pairId }
                         if (pair != null) {
                             val games = pair.games.map { pairGame ->
+                                val round = tournament.rounds.firstOrNull { it.roundNumber == pairGame.round }
                                 Game(
                                     id = pairGame.id,
                                     round = pairGame.round,
                                     courtNumber = pairGame.courtNumber,
-                                    status = pairGame.status,  // Already a string from backend
+                                    status = computeGameStatus(
+                                        tournament.startDate,
+                                        round?.startTime,
+                                        round?.endTime,
+                                        pairGame.status
+                                    ),
                                     pair1 = pair.displayName,
                                     pair2 = pairGame.opponentPair.displayName,
                                     isOurGame = true,
-                                    scheduledTime = tournament.rounds
-                                        .firstOrNull { it.roundNumber == pairGame.round }
-                                        ?.startTime
+                                    scheduledTime = round?.startTime
                                 )
                             }
                             Timber.i("Found ${games.size} games for pair $pairId")
@@ -162,7 +170,7 @@ class GamesViewModel @Inject constructor(
                 pairDisplayName = pname
             )
             _isTracked.value = true
-            wearDataSyncService.syncTrackedPairs()
+            wearSyncService.syncTrackedPairs()
         }
     }
 
@@ -178,7 +186,7 @@ class GamesViewModel @Inject constructor(
         viewModelScope.launch {
             repository.untrackPair(tid, pairIdInt)
             _isTracked.value = false
-            wearDataSyncService.syncTrackedPairs()
+            wearSyncService.syncTrackedPairs()
         }
     }
 
@@ -198,6 +206,45 @@ class GamesViewModel @Inject constructor(
 
         if (tid != null && pid != null && pname != null) {
             loadGames(tid, pid, pname)
+        }
+    }
+
+    private fun computeGameStatus(
+        tournamentStartDate: String?,
+        roundStartTime: String?,
+        roundEndTime: String?,
+        backendStatus: String
+    ): String {
+        // Trust backend for terminal states
+        val statusLower = backendStatus.lowercase()
+        if (statusLower == "cancelled") return backendStatus
+
+        if (roundStartTime == null) return backendStatus
+
+        return try {
+            val now = LocalDateTime.now()
+            val date = tournamentStartDate?.let {
+                try {
+                    LocalDateTime.parse(it, DateTimeFormatter.ISO_LOCAL_DATE_TIME).toLocalDate()
+                } catch (e: Exception) {
+                    LocalDate.parse(it, DateTimeFormatter.ISO_LOCAL_DATE)
+                }
+            } ?: LocalDate.now()
+
+            val startTime = LocalTime.parse(roundStartTime, DateTimeFormatter.ofPattern("HH:mm:ss"))
+            val gameStart = LocalDateTime.of(date, startTime)
+
+            if (now.isBefore(gameStart)) return "Scheduled"
+
+            if (roundEndTime != null) {
+                val endTime = LocalTime.parse(roundEndTime, DateTimeFormatter.ofPattern("HH:mm:ss"))
+                val gameEnd = LocalDateTime.of(date, endTime)
+                if (now.isBefore(gameEnd)) return "InProgress"
+            }
+
+            "Completed"
+        } catch (e: Exception) {
+            backendStatus
         }
     }
 }

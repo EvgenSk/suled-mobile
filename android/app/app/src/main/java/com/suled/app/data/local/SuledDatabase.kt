@@ -13,13 +13,14 @@ import com.suled.app.data.local.entity.TrackedPairEntity
  * 
  * Version History:
  * - Version 1: Initial schema with TournamentEntity and TrackedPairEntity
+ * - Version 2: Added startTime to TournamentEntity
  */
 @Database(
     entities = [
         TournamentEntity::class,
         TrackedPairEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 abstract class SuledDatabase : RoomDatabase() {

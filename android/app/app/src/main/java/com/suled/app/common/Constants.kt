@@ -39,7 +39,7 @@ object Constants {
         const val DATABASE_NAME = "suled_database"
         
         /** Current database version */
-        const val DATABASE_VERSION = 1
+        const val DATABASE_VERSION = 2
         
         /** Cache time-to-live in milliseconds (7 days) */
         const val CACHE_TTL_MILLIS = 7L * 24 * 60 * 60 * 1000

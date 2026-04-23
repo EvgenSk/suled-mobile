@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface TournamentDao {
     
-    @Query("SELECT * FROM tournaments ORDER BY startDate DESC")
+    @Query("SELECT * FROM tournaments ORDER BY startDate ASC")
     fun observeAllTournaments(): Flow<List<TournamentEntity>>
     
     @Query("SELECT * FROM tournaments WHERE id = :tournamentId")
@@ -19,7 +19,7 @@ interface TournamentDao {
     @Query("SELECT * FROM tournaments WHERE id = :tournamentId")
     fun observeTournamentById(tournamentId: String): Flow<TournamentEntity?>
     
-    @Query("SELECT * FROM tournaments WHERE status = :status ORDER BY startDate DESC")
+    @Query("SELECT * FROM tournaments WHERE status = :status ORDER BY startDate ASC")
     fun observeTournamentsByStatus(status: String): Flow<List<TournamentEntity>>
     
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -39,4 +39,7 @@ interface TournamentDao {
     
     @Query("DELETE FROM tournaments WHERE lastUpdated < :timestamp")
     suspend fun deleteOldTournaments(timestamp: Long)
+
+    @Query("DELETE FROM tournaments WHERE startDate IS NOT NULL AND startDate < :today")
+    suspend fun deletePastTournaments(today: String)
 }

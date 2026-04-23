@@ -1,5 +1,6 @@
 package com.suled.app.repository
 
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.suled.app.data.api.TournamentApiService
 import com.suled.app.data.local.dao.TournamentDao
 import com.suled.app.data.local.dao.TrackedPairDao
@@ -11,6 +12,8 @@ import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -23,7 +26,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.net.HttpURLConnection
 import java.util.concurrent.TimeUnit
 
@@ -39,6 +41,8 @@ class TournamentRepositoryTest {
     private lateinit var tournamentDao: TournamentDao
     private lateinit var trackedPairDao: TrackedPairDao
 
+    private val json = Json { ignoreUnknownKeys = true; explicitNulls = false }
+
     @Before
     fun setup() {
         mockWebServer = MockWebServer()
@@ -50,10 +54,11 @@ class TournamentRepositoryTest {
             .writeTimeout(1, TimeUnit.SECONDS)
             .build()
 
+        val contentType = "application/json".toMediaType()
         apiService = Retrofit.Builder()
             .baseUrl(mockWebServer.url("/"))
             .client(client)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(json.asConverterFactory(contentType))
             .build()
             .create(TournamentApiService::class.java)
 
@@ -512,9 +517,9 @@ class TournamentRepositoryTest {
         val request = mockWebServer.takeRequest()
         assertEquals("GET", request.method)
         assertTrue(request.path?.contains("tournaments") == true)
-        // Default parameters should still be included
-        assertTrue(request.path?.contains("status=Upcoming") == true)
+        // maxResults=100 is the default; status is null by default so omitted from URL
         assertTrue(request.path?.contains("maxResults=100") == true)
+        assertTrue(request.path?.contains("status") == false)
     }
 
     @Test

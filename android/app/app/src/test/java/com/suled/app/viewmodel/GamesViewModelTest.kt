@@ -6,6 +6,7 @@ import com.suled.app.data.models.TournamentDetail
 import com.suled.app.data.models.TournamentPair
 import com.suled.app.data.repository.TournamentRepository
 import com.suled.app.ui.state.GamesUiState
+import com.suled.wear.WearSyncService
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +29,7 @@ import java.io.IOException
 class GamesViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
+    private val wearSyncService = mockk<WearSyncService>(relaxed = true)
 
     @Before
     fun setup() {
@@ -42,8 +44,8 @@ class GamesViewModelTest {
     @Test
     fun `initial state is empty`() {
         // Given
-        val repository = mockk<TournamentRepository>()
-        val viewModel = GamesViewModel(repository)
+        val repository = mockk<TournamentRepository>(relaxed = true)
+        val viewModel = GamesViewModel(repository, wearSyncService)
 
         // Then - initial state is Loading
         assertTrue(viewModel.uiState.value is GamesUiState.Loading)
@@ -52,7 +54,7 @@ class GamesViewModelTest {
     @Test
     fun `loadGames updates state with games on success`() = runTest(testDispatcher) {
         // Given
-        val repository = mockk<TournamentRepository>()
+        val repository = mockk<TournamentRepository>(relaxed = true)
         val tournamentId = "tournament-1"
         val pairId = "pair-1"
         val pairName = "Team A"
@@ -90,7 +92,7 @@ class GamesViewModelTest {
             )
         )
         coEvery { repository.getTournamentDetail(tournamentId) } returns Result.success(tournament)
-        val viewModel = GamesViewModel(repository)
+        val viewModel = GamesViewModel(repository, wearSyncService)
 
         // When
         viewModel.loadGames(tournamentId, pairId, pairName)
@@ -105,7 +107,7 @@ class GamesViewModelTest {
     @Test
     fun `loadGames sets loading state correctly`() = runTest(testDispatcher) {
         // Given
-        val repository = mockk<TournamentRepository>()
+        val repository = mockk<TournamentRepository>(relaxed = true)
         val tournamentId = "tournament-1"
         val pairId = "pair-1"
         val pairName = "Team A"
@@ -126,7 +128,7 @@ class GamesViewModelTest {
             )
         )
         coEvery { repository.getTournamentDetail(tournamentId) } returns Result.success(tournament)
-        val viewModel = GamesViewModel(repository)
+        val viewModel = GamesViewModel(repository, wearSyncService)
 
         // When
         viewModel.loadGames(tournamentId, pairId, pairName)
@@ -139,13 +141,13 @@ class GamesViewModelTest {
     @Test
     fun `loadGames updates state with error on failure`() = runTest(testDispatcher) {
         // Given
-        val repository = mockk<TournamentRepository>()
+        val repository = mockk<TournamentRepository>(relaxed = true)
         val tournamentId = "tournament-1"
         val pairId = "pair-1"
         val pairName = "Team A"
         val errorMessage = "Failed to load tournament"
         coEvery { repository.getTournamentDetail(tournamentId) } returns Result.failure(IOException(errorMessage))
-        val viewModel = GamesViewModel(repository)
+        val viewModel = GamesViewModel(repository, wearSyncService)
 
         // When
         viewModel.loadGames(tournamentId, pairId, pairName)
@@ -160,7 +162,7 @@ class GamesViewModelTest {
     @Test
     fun `loadGames handles empty games list`() = runTest(testDispatcher) {
         // Given
-        val repository = mockk<TournamentRepository>()
+        val repository = mockk<TournamentRepository>(relaxed = true)
         val tournamentId = "tournament-1"
         val pairId = "pair-1"
         val pairName = "Team A"
@@ -181,7 +183,7 @@ class GamesViewModelTest {
             )
         )
         coEvery { repository.getTournamentDetail(tournamentId) } returns Result.success(tournament)
-        val viewModel = GamesViewModel(repository)
+        val viewModel = GamesViewModel(repository, wearSyncService)
 
         // When
         viewModel.loadGames(tournamentId, pairId, pairName)
@@ -195,12 +197,12 @@ class GamesViewModelTest {
     @Test
     fun `loadGames handles exception without message`() = runTest(testDispatcher) {
         // Given
-        val repository = mockk<TournamentRepository>()
+        val repository = mockk<TournamentRepository>(relaxed = true)
         val tournamentId = "tournament-1"
         val pairId = "pair-1"
         val pairName = "Team A"
         coEvery { repository.getTournamentDetail(tournamentId) } returns Result.failure(RuntimeException())
-        val viewModel = GamesViewModel(repository)
+        val viewModel = GamesViewModel(repository, wearSyncService)
 
         // When
         viewModel.loadGames(tournamentId, pairId, pairName)
@@ -214,7 +216,7 @@ class GamesViewModelTest {
     @Test
     fun `retry calls loadGames with same parameters`() = runTest(testDispatcher) {
         // Given
-        val repository = mockk<TournamentRepository>()
+        val repository = mockk<TournamentRepository>(relaxed = true)
         val tournamentId = "tournament-1"
         val pairId = "pair-1"
         val pairName = "Team A"
@@ -235,7 +237,7 @@ class GamesViewModelTest {
             )
         )
         coEvery { repository.getTournamentDetail(tournamentId) } returns Result.success(tournament)
-        val viewModel = GamesViewModel(repository)
+        val viewModel = GamesViewModel(repository, wearSyncService)
 
         // When
         viewModel.loadGames(tournamentId, pairId, pairName)
@@ -249,7 +251,7 @@ class GamesViewModelTest {
     @Test
     fun `pair not found shows error`() = runTest(testDispatcher) {
         // Given
-        val repository = mockk<TournamentRepository>()
+        val repository = mockk<TournamentRepository>(relaxed = true)
         val tournamentId = "tournament-1"
         val pairId = "pair-not-found"
         val pairName = "Unknown Team"
@@ -270,7 +272,7 @@ class GamesViewModelTest {
             )
         )
         coEvery { repository.getTournamentDetail(tournamentId) } returns Result.success(tournament)
-        val viewModel = GamesViewModel(repository)
+        val viewModel = GamesViewModel(repository, wearSyncService)
 
         // When
         viewModel.loadGames(tournamentId, pairId, pairName)
@@ -284,7 +286,7 @@ class GamesViewModelTest {
     @Test
     fun `status conversion works correctly`() = runTest(testDispatcher) {
         // Given
-        val repository = mockk<TournamentRepository>()
+        val repository = mockk<TournamentRepository>(relaxed = true)
         val tournamentId = "tournament-1"
         val pairId = "pair-1"
         val pairName = "Team A"
@@ -314,7 +316,7 @@ class GamesViewModelTest {
             )
         )
         coEvery { repository.getTournamentDetail(tournamentId) } returns Result.success(tournament)
-        val viewModel = GamesViewModel(repository)
+        val viewModel = GamesViewModel(repository, wearSyncService)
 
         // When
         viewModel.loadGames(tournamentId, pairId, pairName)

@@ -2,7 +2,7 @@
 
 ## 🚨 CRITICAL WORKFLOW RULE
 **ALWAYS run tests IMMEDIATELY after making code changes, especially refactoring.**
-- Command: `.\gradlew.bat test` (from android/app directory)
+- Command: `./gradlew test` (from android/app directory)
 - Do NOT report work as complete until tests pass
 - This is a mandatory step, not optional
 
@@ -17,12 +17,12 @@
 
 ### After Refactoring
 - **CRITICAL: IMMEDIATELY run tests after ANY refactoring** - this is non-negotiable
-- **REQUIRED STEP**: Run unit tests: `.\gradlew.bat test` (from android/app directory)
-- **REQUIRED STEP**: Run instrumented tests (if UI changed): `.\gradlew.bat connectedAndroidTest`
+- **REQUIRED STEP**: Run unit tests: `./gradlew test` (from android/app directory)
+- **REQUIRED STEP**: Run instrumented tests (if UI changed): `./gradlew connectedAndroidTest`
 - **DO NOT** present work as complete until ALL tests pass
-- Run specific test class if needed: `.\gradlew.bat test --tests "com.suled.app.viewmodel.GamesViewModelTest"`
+- Run specific test class if needed: `./gradlew test --tests "com.suled.app.viewmodel.GamesViewModelTest"`
 - Fix any failing tests before considering the refactoring complete
-- Ensure all 39+ unit tests and 9+ UI tests pass before committing
+- Ensure all tests pass before committing
 - **WORKFLOW**: Code change → Run tests → Fix failures → Verify passing → THEN report complete
 
 ### Test Maintenance

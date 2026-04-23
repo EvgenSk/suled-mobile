@@ -6,6 +6,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import android.net.Uri
 import com.suled.app.ui.screens.GamesListScreen
 import com.suled.app.ui.screens.PairSelectionScreen
 import com.suled.app.ui.screens.TournamentListScreen
@@ -14,9 +15,10 @@ object Routes {
     const val TOURNAMENT_LIST = "tournament_list"
     const val PAIR_SELECTION = "pair_selection/{tournamentId}"
     const val GAMES_LIST = "games_list/{tournamentId}/{pairId}/{pairName}"
-    
+
     fun pairSelectionRoute(tournamentId: String) = "pair_selection/$tournamentId"
-    fun gamesListRoute(tournamentId: String, pairId: String, pairName: String) = "games_list/$tournamentId/$pairId/$pairName"
+    fun gamesListRoute(tournamentId: String, pairId: String, pairName: String) =
+        "games_list/$tournamentId/$pairId/${Uri.encode(pairName)}"
 }
 
 @Composable

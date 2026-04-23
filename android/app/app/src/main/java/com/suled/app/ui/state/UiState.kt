@@ -25,8 +25,7 @@ sealed interface TournamentListUiState {
      * Error state with error message
      */
     data class Error(
-        val message: String,
-        val tournaments: List<Tournament> = emptyList()
+        val message: String
     ) : TournamentListUiState
 }
 

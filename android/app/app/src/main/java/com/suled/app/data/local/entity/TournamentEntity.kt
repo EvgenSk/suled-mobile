@@ -17,6 +17,7 @@ data class TournamentEntity(
     val description: String,
     val startDate: String?,
     val endDate: String?,
+    val startTime: String?,
     val status: String,
     val gameCount: Int,
     val createdDate: String,
@@ -34,6 +35,7 @@ fun Tournament.toEntity() = TournamentEntity(
     description = description,
     startDate = startDate,
     endDate = endDate,
+    startTime = startTime,
     status = status,
     gameCount = gameCount,
     createdDate = createdDate
@@ -50,6 +52,7 @@ fun TournamentEntity.toDomain() = Tournament(
     description = description,
     startDate = startDate,
     endDate = endDate,
+    startTime = startTime,
     status = status,
     gameCount = gameCount,
     createdDate = createdDate
