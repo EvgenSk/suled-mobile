@@ -79,8 +79,7 @@ class NextGameComplication : SuspendingComplicationDataSourceService() {
     
     private fun buildShortText(game: com.suled.models.NextGameInfo): ShortTextComplicationData {
         val timeText = when {
-            game.minutesUntilStart < 0 -> "Now!"
-            game.minutesUntilStart == 0 -> "Now"
+            game.minutesUntilStart >= -3 -> "Now"
             game.minutesUntilStart < 60 -> "${game.minutesUntilStart}m"
             else -> {
                 val hours = game.minutesUntilStart / 60
@@ -106,8 +105,7 @@ class NextGameComplication : SuspendingComplicationDataSourceService() {
     
     private fun buildLongText(game: com.suled.models.NextGameInfo): LongTextComplicationData {
         val timeText = when {
-            game.minutesUntilStart < 0 -> "Starting now!"
-            game.minutesUntilStart == 0 -> "Now"
+            game.minutesUntilStart >= -3 -> "Now"
             game.minutesUntilStart < 60 -> "in ${game.minutesUntilStart} min"
             else -> {
                 val hours = game.minutesUntilStart / 60
@@ -138,7 +136,7 @@ class NextGameComplication : SuspendingComplicationDataSourceService() {
         val value = game.minutesUntilStart.coerceIn(0, 60).toFloat()
         
         val timeText = when {
-            game.minutesUntilStart < 0 -> "Now"
+            game.minutesUntilStart >= -3 -> "Now"
             game.minutesUntilStart == 0 -> "0m"
             else -> "${game.minutesUntilStart}m"
         }

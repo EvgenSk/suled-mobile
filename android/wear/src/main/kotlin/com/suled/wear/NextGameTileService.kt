@@ -89,12 +89,13 @@ class NextGameTileService : SuspendingTileService() {
     ): LayoutElementBuilders.LayoutElement {
 
         val timeText = when {
-            game.minutesUntilStart <= 0 -> "Starting now!"
-            game.minutesUntilStart < 60 -> "in ${game.minutesUntilStart} min"
+            game.minutesUntilStart >= -3 -> "Now"
+            game.minutesUntilStart == 0 -> "Next"
+            game.minutesUntilStart < 60 -> "Next · ${game.minutesUntilStart}m"
             else -> {
                 val h = game.minutesUntilStart / 60
                 val m = game.minutesUntilStart % 60
-                "in ${h}h ${m}m"
+                "Next · ${h}h${m}m"
             }
         }
 

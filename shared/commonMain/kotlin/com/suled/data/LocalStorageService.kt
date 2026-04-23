@@ -198,25 +198,35 @@ class LocalStorageService(private val provider: LocalStorageProvider) {
     }
 
     /**
-     * Get the next game (lowest round number that isn't completed).
+     * Get the next game to display on the watch.
+     * Prefers the first game that has not yet started so the watch shows "Next"
+     * rather than "Now" for an already-in-progress round.
+     * Falls back to the in-progress game only when no future game is available.
      */
     fun getNextGame(): NextGameInfo? {
-        val nextGame = getUpcomingGames().firstOrNull() ?: return null
+        val allGames = getUpcomingGames()
+        if (allGames.isEmpty()) return null
         val now = Clock.System.now()
 
-        val minutesUntilStart = if (nextGame.scheduledTime.isNotEmpty()) {
+        // Prefer a game that hasn't started yet; fall back to in-progress if none.
+        val gameToShow = allGames.firstOrNull { game ->
+            game.scheduledTime.isEmpty() ||
+                try { Instant.parse(game.scheduledTime) > now } catch (_: Exception) { false }
+        } ?: allGames.first()
+
+        val minutesUntilStart = if (gameToShow.scheduledTime.isNotEmpty()) {
             try {
-                ((Instant.parse(nextGame.scheduledTime) - now).inWholeSeconds / 60).toInt()
+                ((Instant.parse(gameToShow.scheduledTime) - now).inWholeSeconds / 60).toInt()
             } catch (e: Exception) { 0 }
         } else 0
 
         return NextGameInfo(
-            tournamentName = nextGame.tournamentName,
-            pairDisplayName = nextGame.pairDisplayName,
-            round = nextGame.round,
-            courtNumber = nextGame.courtNumber,
-            opponentPairName = nextGame.opponentPairName,
-            scheduledTime = nextGame.scheduledTime,
+            tournamentName = gameToShow.tournamentName,
+            pairDisplayName = gameToShow.pairDisplayName,
+            round = gameToShow.round,
+            courtNumber = gameToShow.courtNumber,
+            opponentPairName = gameToShow.opponentPairName,
+            scheduledTime = gameToShow.scheduledTime,
             minutesUntilStart = minutesUntilStart
         )
     }

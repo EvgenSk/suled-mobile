@@ -102,11 +102,7 @@ fun NextGameScreen() {
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = when {
-                                game.minutesUntilStart <= 0 -> "Now"
-                                game.minutesUntilStart == 1 -> "In 1 min"
-                                else -> "In ${game.minutesUntilStart} min"
-                            },
+                            text = if (game.minutesUntilStart >= -3) "Now" else "Next",
                             style = MaterialTheme.typography.body1,
                             textAlign = TextAlign.Center
                         )
