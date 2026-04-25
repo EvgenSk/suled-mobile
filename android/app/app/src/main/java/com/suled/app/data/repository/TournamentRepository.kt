@@ -208,6 +208,10 @@ class TournamentRepository @Inject constructor(
     override fun observeTrackedPairs(): Flow<List<TrackedPairEntity>> {
         return trackedPairDao.observeAllTrackedPairs()
     }
+
+    override fun observeTrackedPair(): Flow<TrackedPairEntity?> {
+        return trackedPairDao.observeTrackedPair()
+    }
     
     /**
      * Check if pair is tracked
@@ -239,6 +243,7 @@ class TournamentRepository @Inject constructor(
                 pairId = pairId,
                 pairDisplayName = pairDisplayName
             )
+            trackedPairDao.deleteAllTrackedPairs()
             trackedPairDao.insertTrackedPair(entity)
             Result.success(Unit)
         } catch (e: Exception) {

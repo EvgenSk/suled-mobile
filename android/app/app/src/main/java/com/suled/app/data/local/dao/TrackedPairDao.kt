@@ -12,6 +12,9 @@ interface TrackedPairDao {
     
     @Query("SELECT * FROM tracked_pairs ORDER BY addedDate DESC")
     fun observeAllTrackedPairs(): Flow<List<TrackedPairEntity>>
+
+    @Query("SELECT * FROM tracked_pairs LIMIT 1")
+    fun observeTrackedPair(): Flow<TrackedPairEntity?>
     
     @Query("SELECT * FROM tracked_pairs")
     suspend fun getAllTrackedPairs(): List<TrackedPairEntity>

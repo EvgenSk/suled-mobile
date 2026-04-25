@@ -33,62 +33,25 @@ class LocalStorageService(private val provider: LocalStorageProvider) {
     }
     
     companion object {
-        private const val TRACKED_PAIRS_KEY = "suled_tracked_pairs"
+        private const val TRACKED_PAIR_KEY = "suled_tracked_pair"
         private const val TOURNAMENTS_CACHE_PREFIX = "suled_tournament_"
     }
-    
-    /**
-     * Get all tracked pairs
-     */
-    fun getTrackedPairs(): List<TrackedPair> {
-        return try {
-            val jsonString = provider.getString(TRACKED_PAIRS_KEY) ?: return emptyList()
-            json.decodeFromString(jsonString)
-        } catch (e: Exception) {
-            emptyList()
-        }
+
+    fun getTrackedPair(): TrackedPair? = runCatching {
+        provider.getString(TRACKED_PAIR_KEY)?.let { json.decodeFromString<TrackedPair>(it) }
+    }.getOrNull()
+
+    fun setTrackedPair(pair: TrackedPair) {
+        provider.putString(TRACKED_PAIR_KEY, json.encodeToString(pair))
     }
-    
-    /**
-     * Add a tracked pair
-     */
-    fun addTrackedPair(pair: TrackedPair) {
-        val pairs = getTrackedPairs().toMutableList()
-        
-        // Check if already tracked
-        val existing = pairs.find { 
-            it.tournamentId == pair.tournamentId && it.pairId == pair.pairId 
-        }
-        
-        if (existing == null) {
-            pairs.add(pair)
-            provider.putString(TRACKED_PAIRS_KEY, json.encodeToString(pairs))
-        }
+
+    fun clearTrackedPair() {
+        provider.remove(TRACKED_PAIR_KEY)
     }
-    
-    /**
-     * Remove a tracked pair
-     */
-    fun removeTrackedPair(tournamentId: String, pairId: Int) {
-        val pairs = getTrackedPairs().toMutableList()
-        pairs.removeAll { it.tournamentId == tournamentId && it.pairId == pairId }
-        provider.putString(TRACKED_PAIRS_KEY, json.encodeToString(pairs))
-    }
-    
-    /**
-     * Check if a pair is tracked
-     */
+
     fun isTracked(tournamentId: String, pairId: Int): Boolean {
-        return getTrackedPairs().any { 
-            it.tournamentId == tournamentId && it.pairId == pairId 
-        }
-    }
-    
-    /**
-     * Clear all tracked pairs
-     */
-    fun clearAllTrackedPairs() {
-        provider.remove(TRACKED_PAIRS_KEY)
+        val pair = getTrackedPair() ?: return false
+        return pair.tournamentId == tournamentId && pair.pairId == pairId
     }
     
     /**
@@ -138,7 +101,7 @@ class LocalStorageService(private val provider: LocalStorageProvider) {
      * Get all upcoming games for tracked pairs
      */
     fun getUpcomingGames(): List<UpcomingGame> {
-        val trackedPairs = getTrackedPairs()
+        val trackedPairs = listOfNotNull(getTrackedPair())
         val upcomingGames = mutableListOf<UpcomingGame>()
         val now = Clock.System.now()
 

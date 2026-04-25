@@ -58,20 +58,10 @@ class WearDataListenerService : WearableListenerService() {
         try {
             val dataMap = DataMapItem.fromDataItem(dataItem).dataMap
             val pairsJson = dataMap.getString("pairs") ?: return
-            
             val pairs: List<TrackedPair> = json.decodeFromString(pairsJson)
-            
-            // Clear existing tracked pairs
-            localStorage.clearAllTrackedPairs()
-            
-            // Save new tracked pairs
-            pairs.forEach { pair ->
-                localStorage.addTrackedPair(pair)
-            }
-            
-            // Update complications to show new data
+            val pair = pairs.firstOrNull()
+            if (pair != null) localStorage.setTrackedPair(pair) else localStorage.clearTrackedPair()
             updateComplications()
-            
         } catch (e: Exception) {
             e.printStackTrace()
         }

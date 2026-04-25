@@ -94,6 +94,8 @@ interface ITournamentRepository {
      * @return Flow emitting list of tracked pairs as they change
      */
     fun observeTrackedPairs(): Flow<List<TrackedPairEntity>>
+
+    fun observeTrackedPair(): Flow<TrackedPairEntity?>
     
     /**
      * Check if a pair is currently tracked.
